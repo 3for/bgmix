@@ -1,0 +1,1116 @@
+\documentclass[11pt]{report} % Aptara syntax
+
+
+%\usepackage{authblk}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{comment}
+\usepackage{listings}
+\lstset{columns=flexible,basicstyle=\footnotesize}
+\usepackage{lscape}
+\usepackage{moreverb}
+\usepackage[width=\textwidth]{caption}
+
+\usepackage[colorlinks,bookmarksopen,bookmarksnumbered,citecolor=red,urlcolor=red]{hyperref}
+
+\usepackage{geometry}
+
+\usepackage{longtable}
+
+\newcommand\BibTeX{{\rmfamily B\kern-.05em \textsc{i\kern-.025em b}\kern-.08em
+T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\usepackage{booktabs,mathptmx,siunitx}
+
+\newcommand{\picoql}{{\sc p}i{\sc co~ql}}
+\newcommand{\Picoql}{Pi{\sc co~ql}}
+\newcommand{\etal}{{\em et al.}}
+%\newcommand*{\PHD}{}
+%\newcommand*{\JOURNAL}{\PHD}
+%\newcommand*{\REF}{}
+
+
+% Document starts
+\begin{document}
+
+
+% Title portion
+\title{Documentation of
+an efficient shuffling scheme for the construction of mix-nets}
+\author{Marios Fragkoulis}
+
+\maketitle
+
+\begin{abstract}
+
+This is a documentation of the work carried out by Bayer and Groth~\cite{BayerG12}.
+The authors describe a minimal argument for verifying the correctness of a shuffle 
+operation assuming zero knowledge.
+They evaluate their approach by verifying the correctness of a shuffle of
+100000 ElGamal cipher texts.
+
+The documentation starts by presenting important aspects of the argument.
+The high-level workflow of the shuffle argument follows.
+The third chapter is devoted to the multi-exponentiation argument
+and the fourth to the product argument.
+These are the constituents of the shuffle argument.
+Finally, the appendix includes cryptographic definitions.
+
+This documentation aims to be self-contained.
+Thus, it includes verbatim text taken from the original paper.
+
+\end{abstract}
+
+
+
+\tableofcontents
+
+
+\chapter{Aspects of the shuffle argument}
+
+The purpose of this chapter is to introduce important aspects of the shuffle argument.
+The notation that will be used throughout this report, which is identical to the notation used
+in the paper is presented first.
+Then the setup algorithm and security guarantees are described.
+Section~\ref{sec:assm} documents in a formal manner (taken from the original paper) the 
+assumptions the authors use to describe the strength of the shuffle argument.
+This is the most important section of this chapter.
+A description of the commitment scheme used in the shuffle argument follows.
+Finally, a heuristic and a lemma used in the paper are presented.
+
+\section{Notation}
+
+%TODO: remove "we" throughout.
+We write $y = A(x; r)$ when the algorithm $A$ on input $x$ and randomness $r$, outputs $y$. 
+We write $y \leftarrow A(x)$ for the process of picking randomness $r$ at random and 
+setting $y = A(x; r)$. 
+We also write $y \leftarrow S$ for sampling $y$ uniformly at random from a set $S$.
+
+We say a function $f :N \rightarrow [0,1]$ is negligible if $f(\lambda)=O(\lambda - c)$ for every 
+constant $c>0$. We say $1-f$ is overwhelming if f is negligible. 
+We will give a security parameter $\lambda$ written in unary as input to all parties in our protocols. 
+Intuitively, the higher the security parameter the more secure the protocol. 
+Formally, we define security in the following sections by saying an adversarial algorithm 
+has negligible (in the security parameter) probability of succeeding in its attack.
+
+For vectors of group elements, we write $\vec{c} \vec{y} = (x_1 y_1,..., x_n y_n)$ for the 
+entry-wise product and correspondingly $x^z = (x^z_1,..., x^z_n)$. 
+We write $\vec{x}_{\pi}$ if the entries of vector $\vec{x}$ are permuted by the 
+permutation $\pi$, i.e., $\vec{x}_{\pi} =(x_{\pi(1)},...,x_{\pi(n)})$.
+For vectors of field elements, we use the standard inner product 
+$\vec{x} \vec{y} = \Pi^n_{i=1} x_i y_i$.
+
+\section{Setup algorithm and security guarantees}
+
+The argument consists of a prover P and a verifier V, both of which are probabilistic 
+polynomial time interactive algorithms.
+We assume the existence of a probabilistic polynomial time setup algorithm G 
+that when given a security parameter $\lambda$ returns a common reference string $\sigma$.
+
+In our case, the common reference string will be $\sigma = (pk, ck)$, where pk and ck are public 
+keys for the ElGamal encryption scheme and the generalized Pedersen commitment scheme 
+described previously. 
+The encryption scheme and the commitment scheme may use different underlying groups, 
+but we require that they have the same prime order q. We will write G for the group used 
+by the commitment scheme and write H for the ciphertext space.
+
+The setup algorithm can also return some side-information that may be used by an adversary; 
+however, we require that even with this side-information the commitment scheme should remain 
+{\em computationally binding}.\footnote{ i.e., semantically secure; a definition is included 
+in Appendix~\ref{app:defs}.}
+The side-information models that the keys may be set up using some multi-party computation 
+protocol that leaks some information, the adversary may see some decryptions or even learn 
+the decryption key, etc. 
+Our protocol for verifying the correctness of a shuffle is secure in the presence of such leaks 
+as long as the commitment scheme is computationally binding.
+
+Let R be a polynomial time decidable ternary relation, we call w a witness for a statement x 
+if $(\sigma, x, w) \in R$. We define the languages
+\begin{equation}
+L_\sigma :={x | \exists w : (\sigma,x,w) \in R}
+\end{equation}as the set of statements x that have a witness w for the relation R.
+
+The public transcript produced by P and V when interacting on inputs s and t is denoted by
+\begin{equation}
+tr \leftarrow \langle P (s), V (t) \rangle
+\end{equation}
+The last part of the transcript is either accept or reject from the verifier. 
+We write 
+\begin{equation}
+\langle P (s), V (t) \rangle = b, b \in {0, 1}
+\end{equation}
+for rejection or acceptance.
+
+\section{Assumptions and strength of the shuffle argument}
+\label{sec:assm}
+
+%TODONE(1): Explain the authors' workflow in demonstrating the shuffle
+% argument's process and its strength.
+The authors use four assumptions that define the setting in which the proposed
+shuffle argument verifies the correctness of a shuffle.
+Effectively the assumptions characterize the strength of the argument.
+The assumptions are defined in order of reducing generality.
+
+
+\subsection{Perfect completeness and computational soundness}
+
+The triple (G, P, V ) is called an argument for a relation R with {\em perfect completeness}
+if for all non-uniform polynomial time interactive adversaries A we have:
+\begin{itemize}
+
+\item Perfect completeness:
+\begin{equation}
+Pr[(\sigma,hist) \leftarrow G(1^\lambda);(x,w) \leftarrow A(\sigma ,hist) : (\sigma ,x,w) \notin R 
+\text{ or } \langle P(\sigma ,x,w),V(\sigma,x)\rangle = 1] = 1 
+ \end{equation}
+The equation states that exactly one of two mutually exclusive events will happen with 
+probability 1: either the triple $(\sigma, x, w)$ does not belong to the space of the relation R
+or the verifier accepts the transcript.
+Perfect completeness in fact means that the verifier will never reject a valid proof.
+
+\item Computational soundness:
+\begin{equation}
+Pr[(\sigma ,hist) \leftarrow G(1^\lambda);x \leftarrow A(\sigma ,hist) : x \notin L_\sigma \text{ and } 
+\langle A,V(\sigma,x)\rangle = 1] \approx 0
+\end{equation}
+The equation states that the probability of accepting the proof of a statement x 
+that does not belong to $L_s$, i.e., a witness $w : (\sigma, x, w) \in R$ cannot
+be extracted, approximates 0.
+
+\end{itemize}
+
+\subsection{Public coin argument}
+
+An argument (G, P, V) is called {\em public coin} if the verifier chooses his messages uniformly at 
+random and independently of the messages sent by the prover, i.e., the challenges correspond 
+to the verifier's randomness $\rho$.
+
+\subsection{Perfect special honest verifier zero knowledge argument}
+
+A public coin argument (G, P, V) is called a {\em perfect special honest verifier zero knowledge 
+({\sc shvzk}) argument} for R with common reference string generator G if there exists a 
+probabilistic polynomial time simulator S such that for all non-uniform polynomial time 
+adversaries A we have:
+\begin{multline}Pr[(\sigma, hist) \leftarrow G(1\lambda); (x, w, \rho) \leftarrow A(\sigma, hist); \\tr \leftarrow \langle P(\sigma,x,w),V(\sigma,x;\rho)\rangle : (\sigma,x,w) \text{ in } R \text{ and } A(tr) = 1] = \\
+Pr[(\sigma, hist) \leftarrow G(1\lambda); (x, w, \rho) \leftarrow A(\sigma, hist); \\ tr \leftarrow S(\sigma,x,\rho) : (\sigma,x,w) \text{ in } R \text{ and } A(tr) = 1]
+\end{multline}
+
+This means that if there exists a probabilistic polynomial time simulator $S$ that 
+accepts a statement $x$ and extracts a witness $w$ for it with the same probability as 
+the public coin argument $(G, P, V)$, then $(G, P, V)$ is {\sc shvzk}.
+
+To construct a fully zero-knowledge argument secure against arbitrary verifiers in the 
+common reference string model one can first construct a {\sc shvzk} argument and then 
+convert it into a fully zero-knowledge argument~\cite{Groth04, GarayMY03}. 
+This conversion has constant additive overhead, so it is very efficient and allows us to 
+focus on the simpler problem of getting {\sc shvzk} against honest verifiers.
+
+To define an argument of knowledge we follow the approach of Groth and Ishai~\cite{GrothI08} 
+and do it through witness-extended emulation first introduced by Lindell~\cite{Lindell01}. 
+This definition informally says that given an adversary that produces an acceptable argument 
+with some probability, {\em there exists an emulator that produces a similar argument with the same 
+probability and at the same time provides a witness w}.
+
+\subsection{Witness extended emulation for argument}
+\label{sub:witness}
+
+A public coin argument (G, P, V) has {\em witness extended emulation} if for all deterministic 
+polynomial time $P^*$ there exists an expected polynomial time emulator X such that for 
+all non-uniform polynomial time adversaries A we have
+\begin{multline}
+Pr[(\sigma, hist) \leftarrow G(1\lambda); (x, s) \leftarrow A(\sigma, hist);
+tr \leftarrow \langle P^*(\sigma, x, s), V(\sigma, x)\rangle : A(tr) = 1] \approx 
+Pr[(\sigma, hist) \leftarrow G(1\lambda); \\
+(x, s) \leftarrow A(\sigma, hist); (tr, w) \leftarrow X^{\langle P^*(\sigma,x,s),
+V(\sigma,x)\rangle} (\sigma, x, \rho) : A(tr) = 1 \\
+\text{ and if tr is accepting then } (\sigma, x, w) \in R]
+\end{multline}
+In the definition, s can be interpreted as the state of $P^*$, including the randomness. 
+So whenever $P^*$ is able to make a convincing argument when in state s, the emulator 
+can extract a witness at the same time giving us an argument of knowledge. 
+\textbf{This definition automatically implies soundness.}
+
+\section{Algorithmic complexity of the shuffle verification argument}
+
+%TODO(2): Explain the complexity
+
+%A zero knowledge argument for the correctness of a shuffle of ElGamal cipher texts
+%is proposed.
+The argument's total cost consists of a communication part and a computation part.
+The argument incurs sublinear communication complexity.
+When shuffling N ciphertexts, arranged in an $m \times n$ matrix, the argument transmits
+$O(m+n)$\footnote{ denotes the matrix's diagonals, which are $m+n-1$ to be precise (see
+Table~\ref{tab:shuf}).} 
+group elements giving a minimal communication complexity of $O(\sqrt N)$
+if $m = n$.
+The prover's computational complexity is $O(Nlogm)$ exponentiations and $O(N)$
+if we allow a logarithmic number of rounds.
+
+
+\section{The commitment scheme}
+
+The original work uses a commitment scheme to freeze values such as a chosen permutation.
+The commitment scheme used is a generalization of the Pedersen commitment
+scheme~\cite{Pedersen92}.
+For a cyclic group $\mathbb{G}$ of large prime order q, the general Pedersen commitment scheme
+selects random generators $G_1,...,G_n,H$ of the group $\mathbb{G}$ and sets the commitment scheme
+$ck = (\mathbb{G},G_1,...,G_n,H)$. To commit to n elements $(a_1,...,a_n)$ $\in$ $\mathbb{Z}^n_q$
+we pick randomness r $\in$ $\mathbb{Z}_q$ and compute 
+\begin{equation}
+com_{ck} = H^r \Pi ^n_{i=1} G^{a_i}_i
+\end{equation}
+We can also commit to less than n elements; this is done by setting the remaining entries to
+0.
+The scheme assumes that interested parties have verified that commitments belong to the 
+group $\mathbb{G}$.
+
+The commitment is computationally binding under the discrete logarithm assumption, that is,
+a non-uniform probabilistic polynomial time adversary has negligible probability of finding
+two different openings of the same commitment.
+Note: This seems to satisfy the {\sc ddh} assumption.
+
+The commitment scheme is perfectly hiding since the commitment is uniformly distributed
+in $\mathbb{G}$ no matter what the messages are.
+Note: this seems to satisfy perfect secrecy, that is, confidentiality against arbitrary adversaries.
+
+A commitment consists of a single group element no matter how big n is.
+This means that the commitment scheme is length reducing; we can commit to n elements
+with a single small commitment.
+\textbf{This property is crucial to get sublinear communication cost.}
+
+The generalized Pedersen commitment scheme is homomorphic; for all $\vec{a},\vec{b}$
+$\in$ $\mathbb{Z}^n_q$ and r,s $\in$ $\mathbb{Z}_q$ we have:
+\begin{equation}
+com_{ck}(\vec{a};r)com_{ck}(\vec{b};s) = H^r \Pi ^n_{i=1} G^{a_i}_i \cdot
+H^r \Pi ^n_{i=1} G^{b_i}_i = H^{r+s} \Pi ^n_{i=1} G^{a_i+b_i}_i = com_{ck}(\vec{a}+\vec{b};r+s)
+\end{equation}
+
+
+\section{Other useful math devices}
+
+The authors refer to the Fiat-Shamir heuristic and the Schwartz-Zippel lemma
+in the original paper.
+
+\subsection{The Fiat-Shamir heuristic}
+
+In the Fiat-Shamir heuristic the prover computes the public-coin challenges with a 
+cryptographic hash function instead of interacting with a verifier. 
+This makes it possible for the prover to compute the entire argument without any 
+interaction, i.e., it is a non-interactive argument.
+
+Non-interactivity is desirable in many applications. Consider for instance an election, 
+where the authorities want to convince independent verifiers that the tally is correct. 
+Using non-interactive arguments the authorities only need to compute the argument once 
+and then they can send the same non-interactive argument to all the verifiers. 
+If the argument was interactive on the other hand, they would have to interact with each 
+verifier, which would increase the complexity of the protocol.
+
+The Fiat-Shamir heuristic is known to be secure in the random oracle model, where the 
+cryptographic hash-function is modeled as a random oracle that returns a uniformly random 
+answer to inputs it has not seen before. 
+Those who are satisfied with a security proof in the random oracle model can therefore 
+obtain a significant saving in interaction and in the proverÕs computation. 
+For the sake of generality, we will describe the interactive protocols though.
+
+\subsection{The Schwartz-Zippel lemma}
+\label{sub:szl}
+
+For completeness we will state a variation of the Schwartz-Zippel lemma that we will use 
+several times. 
+
+\begin{description}
+
+\item Lemma 1 (Schwartz-Zippel). Let p be a non-zero multivariate polynomial of degree d 
+over $Z_q$, then the probability of $p(x_1,...,x_n) = 0$ for randomly chosen 
+$x_1,...,x_n \leftarrow \mathbb{Z}^*_q$ is at most $\frac{d}{q-1}$.
+Given two multi-variate polynomials $p_1$ and $p_2$ we can test whether 
+\begin{equation}
+p_1(x1,..., xn) - p_2(x1,..., x_n) = 0 \text{ for random } x_1,...,x_n \leftarrow \mathbb{Z}^*_q
+\end{equation}
+ or not. 
+This equation will always hold if p1 = p2, whereas if $ p1 \neq p2$ theprobability that the test pass is only $\frac{max(d1,d2)}{q - 1}$.
+
+\end{description}
+
+
+\chapter{High-level workflow of the shuffle argument}
+
+Initially, the setting of the application is described.
+Then the shuffle argument and the complete high-level workflow
+are presented.
+The chapter concludes with the strength of the shuffle argument.
+
+\section{Setting}
+
+Initially, voters commit their votes to the e-voting system in an encrypted form using the
+ElGamal homomorphic encryption scheme.
+To ensure anonymity the votes are permuted and re-encrypted.
+%to unlink the relationship between voters
+%and encrypted votes?.
+So, the votes are input to the mix-net, which may consist of a number of mix-net servers 
+that take turns in shuffling the messages.
+If the encryption scheme is semantically secure, the output does not reveal the permutation 
+of the messages.
+Furthermore, because the votes are encrypted it is not possible to verify directly the 
+correctness of a shuffle operation.
+This could be a window of opportunity for malicious action.
+A malicious mix-net server could substitute encrypted votes with encrypted votes for candidate
+X.
+To verify the correctness of a shuffle operation, the authors
+use a zero-knowledge interactive argument.
+
+\section{Shuffle argument}
+
+%Consider the list of votes arranged in a square $n \times n$ matrix, then
+We will give an argument of knowledge of a permutation $\pi \in \Sigma_N$
+and randomness $\text{\{}\rho_i\text{\}}^N_{i=1}$ such that for given ciphertexts 
+$\text{\{}C_i\text{\}}^N_{i=1}, \text{\{}C_{i'}\text{\}}^N_{i=1} \text{ we have } C_{i'} 
+= C_{\pi(i)} E_{pk}(1; \rho_i)$.
+%\footnote{the encryption function is 1; so, no re-encryption
+%in the shuffling phase?} 
+The shuffle argument combines: 
+
+\begin{itemize}
+
+\item a multi-exponentiation argument, which allows 
+us to prove that the product of a set of ciphertexts raised to a set of committed 
+exponents\footnote{they represent the chosen permutation} yields a 
+particular ciphertext, and 
+
+\item a product argument, which allows us to prove that a set of committed 
+values, that is, the permutation used, has a particular product.
+
+\end{itemize}
+
+It is called zero-knowledge because it reveals nothing about the permutation of
+the randomizers used.
+
+\section{High-level workflow}
+
+The workflow consists of two phases:
+
+\begin{itemize}
+
+\item pick a permutation and verify that this one is used across the shuffling 
+operation by means of the product argument (see Section~\ref{sub:perm}) and,
+
+\item verify the correctness of the shuffling operation itself by means of the
+multi-exponentiation argument (see Section~\ref{sub:shuf}).
+
+\end{itemize}
+
+The authors use (the hierarchy of) assumptions defined in Section~\ref{sec:assm}
+consistently throughout the paper to demonstrate the strength of the argument in 
+terms of the surrounding setting e.g., honest vs arbitrary verifiers.
+The authors sequentially demonstrate that the product argument, 
+multi-exponentiation argument, and optimizations to the latter
+
+\begin{itemize}
+
+\item achieve perfect completeness,
+
+\item are public coin {\sc shvzk} arguments, and
+
+\item have witness-extended emulation.
+
+\end{itemize}
+
+Their objective is twofold:
+
+\begin{itemize}
+
+\item demonstrate that their argument verifies the correctness of a shuffle operation
+assuming zero-knowledge, and
+
+\item demonstrate that it achieves computational soundness.
+
+\end{itemize}
+
+For the first objective, the authors show first how their argument achieves 
+perfect completeness.
+Then they reduce the assumptions and escalate their argument to a public
+coin {\sc shvzk} argument.
+This can be turned into a zero-knowledge argument with additive overhead, hence
+the first objective is accomplished.
+
+For the second objective, the authors demonstrate extracting a witness for each
+acceptable argument, which implies computational soundness 
+according to the definition of witness extended emulation (see Section~\ref{sub:witness}).
+
+\subsection{High-level workflow of the product argument}
+\label{sub:perm}
+
+The product argument is used to verify that a specific permutation is used
+across the shuffling phase.
+Table~\ref{tab:perm} presents the high-level workflow of the product argument.
+
+\begin{longtable}[t]{|p{0.45\textwidth}p{0.45\textwidth}|}
+%\caption{\mbox{Use case (UC) identifiers and descriptions and respective \picoql{} queries}}
+\caption{ presents the high-level workflow of the product argument in terms of 
+prover-verifier interaction.}
+\label{tab:perm} 
+\\ [-5pt]
+    \hline
+    \multicolumn{1}{|c}{{\bf The prover}} 
+    & \multicolumn{1}{c|}{{\bf The verifier}}
+    \\
+    \hline
+    -- wants to extract a witness $\pi \in \Sigma_N$, the permutation, and $\vec{\rho} \in \mathbb{Z}^N_q$
+    such that $\vec{C}' = E_{pk}(\vec{1};\vec{\rho})\vec{C}_{\pi}$ given a public key $ _{pk}$
+    and a commitment key $ _{ck}$ and statements $\vec{C}, \vec{C}' \in \mathbb{H}^N$ with
+    $N=m \times n$.
+    &
+    \\
+    &
+    \\
+    - picks $\vec{r} \leftarrow \mathbb{Z}^m_q$, sets $\vec{a} = \{\pi(i)\}^N_{i=1}$, 
+    and computes $\vec{c}_A = com_{ck} (\vec{a}; \vec{r})$.
+    &
+    \\
+    - sends an argument of knowledge of opening of the commitment, $\vec{c}_A$, to 
+    permutation $1,...,N$ to the verifier, that is, it commits to $\pi(1),..., \pi(N)$.
+    &
+    \\
+    &
+    - sends a challenge $x \leftarrow \mathbb{Z}^*_q$ to the prover.
+    \\
+    - receives $x$, picks $s \in \mathbb{Z}^m_q$, sets $\vec{b} = \{x^{\pi(i)}\}^N_{i=1}$, computes  
+    $\vec{c}_B = com_{ck}(\vec{b}; \vec{s})$.
+    &
+    \\
+    - sends an argument of knowledge of opening of the commitment, $\vec{c}_B$, to 
+    the permutation of $x^1,...,x^N$, that is, it commits to $x^{\pi(1)},..., x^{\pi(N)}$.
+    &
+    \\
+    - {\em seeks to demonstrate that the two permutations are identical.}
+    This would mean that the prover has a commitment to $x^1,..., x^N$
+    permuted in an order that was fixed before the prover saw $x$.
+    &
+    \\
+    &
+    - sends random challenges $y, z \leftarrow \mathbb{Z}^*_q$ to check that the same permutation 
+    has been used in both commitments.
+    \\
+    - defines $\vec{c}_{-z} = com_{ck} (-z,..., -z; \vec{0})$ and $\vec{c}_D=\vec{c}^y_A \vec{c}_B$
+    and computes $\vec{d} = y\vec{a} + \vec{b}, \text{ } \vec{t} = y\vec{r} + \vec{s}$.
+    &
+    \\
+    - computes commitments to $d_1-z = y\pi(1) + x^{\pi(1)} - z,...,d_N-z = y\pi(N) + x^{\pi(N)} - z$
+    in a verifiable manner by using the homomorphic properties of the commitment
+    scheme.
+    &
+    \\
+    - sends $\Pi^N_{i=1}(d_i - z) \text{, } \vec{c_D}\vec{c_{-z}} = com_{ck}(\vec{d} - \vec{z}, \text{ } \vec{t})$. 
+    &
+    \\
+    &
+    - computes $\vec{c_A}^y\vec{c_B}\vec{c_{-z}} = 
+    H^{\vec{r}}(\Pi^N_{i=1}G_i^{a_i})^y \text{ }
+    H^{\vec{s}}\Pi^N_{i=1}G_i^{b_i}\vec{c_{-z}} =
+    H^{y\vec{r}}\Pi^N_{i=1}G_i^{ya_i} \text{ } H^{\vec{s}}\Pi^N_{i=1}G_i^{b_i}\vec{c_{-z}} =
+    H^{y\vec{r}+\vec{s}}\Pi^N_{i=1}G_i^{ya_i + b_i}\vec{c_{-z}} = 
+    com_{ck}(y\vec{a} + \vec{b} - \vec{z}; y\vec{r} + \vec{s}) =
+    com_{ck}(\vec{d} - \vec{z}; \vec{t}) = \vec{c_D}\vec{c_{-z}}$.
+    \\
+    &
+    - computes $\Pi^N_{i=1}(yi + x^i - z)$.
+    
+    If they are the same as
+    the received arguments of knowledge, it means that {\em the same permutation was used.}
+    Effectively $\Pi^N_{i=1}(d_i-z) = \Pi^N_{i=1}(yi + x^i - z)$.
+    \\
+\hline
+\end{longtable}
+
+    Note that in $\Pi^N_{i=1}(d_i-z) = \Pi^N_{i=1}(y\pi(i) + x^{\pi(i)} - z)$, 
+    $\pi(i)$ represents the permutation of the
+    first commitment and $x^{\pi(i)}$ represents the permutation of the second commitment.
+    Only if permutations match, i.e., $\pi(i)$ is the same within each term $y\pi(i) + x^{\pi(i)}$, will the identity
+    $\Pi^N_{i=1}(y\pi(i) + x^{\pi(i)} - z) = \Pi^N_{i=1}(yi + x^i - z)$ hold.
+    It will hold because the order of the $N$ terms has no effect in the product.
+    This proves {\em perfect completeness} of the product argument. 
+
+More formally, observe that we have two identical degree N polynomials in z since 
+the only difference is that the roots have been permuted. 
+The verifier does not know a priori that the two polynomials are identical but can by 
+the {\em Schwartz-Zippel lemma} (Section~\ref{sub:szl}) deduce that the prover has 
+negligible chance over the 
+choice of $z$ of making a convincing argument unless indeed there is a permutation $\pi$ such 
+that $d_1 = y\pi(1) + x^{\pi(1)},..., d_N = y\pi(N) + x^{\pi(N)}$. 
+Furthermore, there is negligible probability over the choice of $y$ of this being true unless 
+the first commitment contains $\pi(1),..., \pi(N)$ and the second commitment contains 
+$x^{\pi(1)},..., x^{\pi(N)}$.
+
+
+\subsection{High-level workflow of the multi-exponentiation argument}
+\label{sub:shuf}
+
+The multi-exponentiation argument is used to verify the correctness of the shuffling operation.
+Continuing from Section~\ref{sub:perm}, the prover now has commitments to $x^{\pi(1)},..., x^{\pi(N)}$ 
+and uses the multi-exponentiation 
+argument to demonstrate that there exists a $\rho$ such that $\Pi^N_{i=1} C^{x^i}_i = 
+E_{pk}(1; \rho) \Pi^N_{i=1} (C'_i)^{x^{\pi(i)}}$. 
+Note that the verifier does not see the committed values and therefore does not 
+learn what the permutation is. 
+However, from the homomorphic properties of the encryption scheme the 
+verifier can deduce $\Pi^N_{i=1} M^{x^i}_i = \Pi^N_{i=1} (M'_i)^{x^{\pi(i)}}$for some permutation $\pi$ that was chosen before the challenge $x$ was sent to the prover. 
+Taking discrete logarithms we have the polynomial identity 
+$\Sigma^N_{i=1} log(M_i)x^i = \Sigma^N_{i=1} log(M'_{\pi^{-1}(i)})x^i$. 
+There is negligible probability over the choice of x of this equality holding true unless 
+$M'_1 = M_{\pi(1)},..., M'_N = M_{\pi(N)}$. 
+This shows that we have a correct shuffle.
+
+\begin{longtable}[t]{|p{0.45\textwidth}p{0.45\textwidth}|}
+%\caption{\mbox{Use case (UC) identifiers and descriptions and respective \picoql{} queries}}
+\caption{ presents the high-level workflow of the multi-exponentiation argument in terms of 
+prover-verifier interaction.}
+\label{tab:high-shuf} 
+\\ [-5pt]
+    \hline
+    \multicolumn{1}{|c}{{\bf The prover}} 
+    & \multicolumn{1}{c|}{{\bf The verifier}}
+    \\
+    \hline
+    \multicolumn{2}{|c|}{(\textit{continuing from Table~\ref{tab:perm}})}
+    \\
+    - computes $\rho=-\vec{\rho} \vec{b}$ and then $E_{pk}(1; \rho)\vec{C}'^{\vec{b}}$ where
+    $E_{pk}(1; \rho)\vec{C}'^{\vec{b}} =$
+    
+    $E_{pk}(\vec{1}; -\vec{\rho})^{\vec{b}} (E_{pk}(\vec{1}; \vec{\rho})\vec{C}_{\pi})^{\vec{b}} =$
+    
+    $\vec{C}^{\vec{b}}_{\pi} = 
+    \Pi^N_{i=1} C^{x^{\pi(i)}}_{\pi(i)} =
+    \vec{C}^{\vec{x}}$
+    
+    This proves perfect completeness of the multi-exponentiation argument.
+    &
+    \\
+    &
+    - sets $\vec{x} = (x, x^2,..., x^N)^T$ and computes $\vec{C}^{\vec{x}}$.
+
+    \\
+\hline
+\end{longtable}
+
+
+\subsection{Strength of the complete argument}
+
+{\em Perfect completeness} follows from the perfect completeness of the product 
+argument and the perfect completeness of the multi-exponentiation argument.
+
+{\em Perfect {\sc shvzk}} follows from the fact that the commitments are perfectly hiding 
+and the underlying arguments are perfect {\sc shvzk}.
+To simulate the entire argument we can pick random commitments 
+$\vec{c}_A, \vec{c}_B \leftarrow com_{ck}(0,...,0)$ which can be done without 
+knowing the witness for the correctness of the shuffle. 
+The simulator then runs perfect {\sc shvzk} simulations of the product and 
+multi-exponentiation arguments.
+
+Finally, we have to show that we have {\em witness-extended emulation}. 
+In the witness-extended emulation we run the prover and verifier $\langle P^*, V\rangle$ 
+with random challenges $x, y, z \in \mathbb{Z}^*_q$ and random challenges for the product and 
+multi-exponentiation arguments. 
+If we get an acceptable argument we have to extract a witness. 
+
+We start by rewinding and running the witness-extended emulators for the product and the 
+multi-exponentiation arguments. 
+This gives us openings of $\vec{c}_B$ and $\vec{c}_D$. 
+Since $\vec{c}_D = \vec{c}^y_A \vec{c}_B$ this allows us to compute openings
+$\vec{a}, \vec{r}$ of $\vec{c}_A$.We will now argue that with overwhelming probability the extracted openings of $\vec{c}_A$ 
+must be of the form $\vec{a} = \{ \pi(i)\}^N_{i=1}$ for some permutation $\pi \in \Sigma_N$. 
+Consider the situation after round 3 where the prover has sent $\vec{c}_B$. 
+The witness-extended emulation of the multi-exponentiation argument gives us the 
+opening $\vec{b}, \vec{s}$ of $\vec{c}_B$ showing that the opening of $\vec{c}_D$ must be of 
+the form $\vec{d} = \vec{y}a + \vec{b}$.
+ 
+The product argument shows that $\Pi^N_{i=1} (d_i - z) = \Pi^N_{i=1}(y_i + x_i - z)$. 
+This has negligible probability over $z$ in succeeding unless there exists a permutation 
+$\pi$ such that $d_i = \pi(i) + x^{\pi(i)}$. 
+This shows $ya_i + b_i = y\pi(i) + x^{\pi(i)}$, which has negligible probability over $y$ of 
+being true unless $a_i = \pi(i)$.
+Furthermore, we then see that $b_i = x^{\pi(i)}$.We now rewind and run the argument until we have extracted witnesses for the 
+multi-exponentiation argument for $N$ random choices of $x$. 
+Each choice $x_j$ gives us a witness containing $\rho^{(j)}$ such that
+
+\begin{equation}
+\vec{C}^{\vec{x}_j} = E_{pk} (1;\rho^{(j)}) \Pi^N_{i=1}(C'_i)^{x^{\pi(i)}_j} = 
+E_{pk} (1;\rho^{(j)})\vec{C}'^{\vec{x}^j}_{\pi_{-1}}
+\end{equation}
+The $N \times N$ matrix
+\begin{equation}
+X = 
+\begin{pmatrix}
+x^1_1 & \cdots & x^1_N \\
+\vdots &  & \vdots \\
+x^N_1 & \cdots & x^N_N
+\end{pmatrix}
+\end{equation}
+
+can be viewed as a submatrix of a transposed Vandermonde matrix. 
+If $x_1,..., x_N$ are different then $X$ is invertible. 
+We now have 
+\begin{equation}
+\vec{C} = (\vec{C}^X)^{X^{-1}} = (E_{pk}(\vec{1}; \vec{\rho}) \vec{C'}^X_{\pi^{-1}})^{X^{-1}} =
+E_{pk}(\vec{1}; \vec{\rho}X^{-1}) \vec{C'}_{\pi^{-1}}
+\end{equation}
+This gives us a permutation $\pi$ and $\vec{\rho}' = (-\vec{\rho} X^{-1})\pi$ such that $\vec{C}' = E_{pk}(\vec{1}; \vec{\rho}')\vec{C}_{\pi}$.
+
+This shows that the protocol is a public coin perfect {\sc shvzk} argument of knowledge of
+$\pi \in \Sigma_N$ and $\vec{\rho} \in Z^N_q$.
+
+The two arguments presented at high level in Sections~\ref{sub:perm} and~\ref{sub:shuf} 
+can be run in parallel.
+Furthermore, the multi-exponentiation argument can be started after the computation 
+of the commitments $\vec{c}_B$.
+
+
+\chapter{The multi-exponentiation argument}
+
+%FIGURE
+
+This chapter is devoted to the multi-exponentiation argument.
+It documents its workflow in detail and presents the applied
+optimizations.
+
+\section{Detailed workflow}
+
+Table~\ref{tab:shuf} presents the high-level workflow of the multi-exponentiation argument
+in the form of prover-verifier interaction.
+
+\begin{longtable}[t]{|p{0.45\textwidth}p{0.45\textwidth}|}
+%\caption{\mbox{Use case (UC) identifiers and descriptions and respective \picoql{} queries}}
+\caption{ presents the high-level workflow of the multi-exponentiation argument in terms of 
+prover-verifier interaction.}
+\label{tab:shuf} 
+\\ [-5pt]
+    \hline
+    \multicolumn{1}{|c}{{\bf The prover}} 
+    & \multicolumn{1}{c|}{{\bf The verifier}}
+    \\
+    \hline
+    - computes $E_k = \Pi_{\substack{1 \leq i, j \leq m \\ j = (k - m) + 1}} \vec{C}^{\vec{a}_j}_i$
+    given ciphertexts $\vec{C}_{11},..., \vec{C}_{mn}$ and $C$.
+    The ciphertext $C = E_m$ is the product of the main diagonal and the other $E_k$'s 
+    are the products of the other diagonals. 
+    &
+    \\
+    - sends $E_1,..., E_{2m-1}$.
+
+    uses a batch-proof to simultaneously convince the verifier that all the diagonal 
+    products give their corresponding $E_k$:
+    &
+    \\
+    &
+    - selects a challenge $x \leftarrow \mathbb{Z}^*_q$ at random.
+    \\
+    - sets $\vec{x} = (x, x_2,..., x_m)^T$ and opens $\vec{c}^{\vec{x}}_A \text{ to }
+    \vec{a} = \Sigma^m_{j=1} x^j\vec{a}_j$.
+    &
+    \\
+    - computes $\Pi^m_{i=1} \vec{C}^{x^{m-i}\vec{a}}_i$.
+    &
+    \\
+    &
+    - computes 
+    $\Pi^{2m -1}_{k = 1} E_k^{x^k}$ where
+    $\Pi^{2m -1}_{k = 1} E_k^{x^k} = $
+
+    $\Pi^{2m -1}_{k = 1} (\Pi^{m,m}_{\substack{i=1, j=0 \\ j=(k-m)+i}} \vec{C}^{\vec{a}_j}_i)^{x^k} = $
+    
+    $\Pi^{2m -1}_{k = 1} \Pi^{m,m}_{\substack{i=1, j=0 \\ k=j+m-i}} \vec{C}^{\vec{a}_j x^{k}}_i = $
+    
+    $\Pi^{m,m}_{\substack{i=1, j=0 \\ k=j+m-i}} \vec{C}^{\vec{a}_j x^{m-i+j}}_i = $
+    
+    $\Pi^{m,m}_{i=1, j=0} \vec{C}^{x^{m-i}x^j\vec{a}_j}_i = $
+    
+    $\Pi^{m}_{i=1} \vec{C}^{x^{m-i}\Sigma^m_{j=0} x^j\vec{a}_j}_i = $
+    
+    $\Pi^{m}_{i=1} \vec{C}^{x^{m-i}\vec{a}}_i$.
+    
+    This proves perfect completeness.
+    \\
+\hline
+\end{longtable}
+
+Since $x$ is chosen at random, the prover has negligible probability of convincing 
+the verifier unless the $x^k$-related terms match on each side of the equality for all $k$. 
+In particular, since $\vec{a} = \Pi^m_{j=1} \vec{x}^ja_j$ the $x^m$-related terms give us
+
+\begin{equation}
+C^{x^m} = \Pi^m_{i=1} \vec{C}^{x^{m-i} \Sigma_{\substack{1 \leq j \leq m \\ m=m-i+j}} x^j \vec{a}^j} =
+\Pi^m_{i=1} \vec{C}^{x^{m-i} x^i \vec{a}_i}_i = (\Pi^m_{i=1} \vec{C}^{a^i}_i)^{x^m}
+\end{equation}
+
+and allow the verifier to conclude $C = \Pi^m_{i=1} \vec{C}^{\vec{a}_i}_i$.
+
+Finally, to make the argument honest verifier zero-knowledge we have to avoid leaking 
+information about the exponent vectors $\vec{a}_1,..., \vec{a}_m$. 
+The prover therefore commits to a random vector $\vec{a}_0 \leftarrow Z^n_q$ and after 
+she sees the challenge $x$ she reveals $\vec{a} = \vec{a}_0 + \Sigma^m_{j=1} x^j\vec{a}_j$. 
+Since $\vec{a}_0$ is chosen at random this vector does not leak any information about the 
+exponents.
+
+\section{Optimizations}
+
+A combination of Toom-Cook~\cite{Toom63} technique for multiplication of large integers 
+and an interactive technique composes the most efficient scheme as the 
+two techniques work well together.
+
+\subsection{Toom-Cook technique for multiplication of very large integers}
+
+The prover's computation involves the following product (originated from 
+Table~\ref{tab:shuf}).
+
+\begin{equation}
+E_k = \Pi_{\substack{1 \leq i, j \leq m \\ j = (k - m) + 1}} \vec{C}^{\vec{a}_j}_i
+\end{equation}
+
+To compute this product $m^2n$ exponentiations are required.
+This stems from the fact that the product
+$\vec{C}^{\vec{a}_1}_1 \times \cdots \times \vec{C}^{\vec{a}_m}_m$
+causes $m^2$ exponentiations and the product
+$C^{a_{j1}}_{i1} \times \cdots \times C^{a_{in}}_{jn}$
+causes another $n$ exponentiations, that is, $m^2n$ in total.
+For large $m$ the cost is prohibitive.
+
+Toom-Cook's technique for polynomial multiplication helps reduce this cost 
+significantly.
+The following form is an equivalent form of the same product.
+
+\begin{equation}
+\Pi^m_{i=1} \vec{C}^{x^{m-i}\vec{a}}_i = 
+\Pi^{m}_{i=1} \vec{C}^{x^{m-i}\Sigma^m_{j=1} x^{j-1}\vec{a}_j}_i
+\end{equation}
+
+It is useful because it allows to model the product as two polynomials of
+degree $m-1$.
+
+\begin{equation}
+\Pi^{m}_{i=1} \vec{C}^{x^{m-i}_i} \text{\hspace{2cm}} \Sigma^m_{j=1} x^{j-1}\vec{a}_j
+\end{equation}
+
+The idea then is to evaluate the product of the polynomials in $2m-1$\footnote{ We need
+m points to solve an equation with m-1 variables. 
+The polynomials introduce 
+$(m-1) + (m-1)$ variables, hence we need  $(m-1) + (m-1) +1$ points.} points of 
+our choice and find their coefficients using polynomial interpolation.
+%TODO: give an example of polynomial interpolation
+%            understand linear combinations
+%            understand roots of unity
+
+The expensive step in this computation is to compute 
+\begin{equation}
+\Pi^{m}_{i=1} \vec{C}^{\omega^{m-i}_0}, ... , \Pi^{m}_{i=1} \vec{C}^{\omega^{m-i}_{2m-2}}
+\end{equation}
+
+Inspired by the Toom-Cook method for integer multiplication,we may for instance choose $\omega_0, \omega_1, ... , \omega_{2m-2}$ to be small integers. 
+When m is small even the largest exponent $\omega_{2m-2}$ will remain small. 
+For instance, if $m = 4$ we may choose $\omega_k \in \{0, -1, 1, -2, 2, -3, 3\}$, which$k$ makes the largest exponent $\omega^{m-1}_k = 3^3 = 27$. 
+This makes it cheap to compute each $\Pi^m_{i=1} \vec{C}^{\omega^{m-1}_k}_i$ because 
+the exponents are very small.The basic step of Toom-Cook sketched above can be optimized by choosing the evaluation 
+points carefully. 
+However, the performance degrades quickly as m grows. 
+Using recursion it is possible to get subquadratic complexity also for large $m$, 
+however, the cost still grows relatively fast. 
+In the next section an interactive technique for reducing 
+the proverÕs computation is described. 
+
+\subsection{Reduced computation, increased interaction}
+
+\setcounter{MaxMatrixCols}{20}
+
+Computing all $m^2$ entries of the matrix is useless.
+The interest focuses on the product along the main diagonal
+in order to show that $C = E_m = \Pi^m_{i=1} \vec{C}^{\vec{a}^i}_i$.
+
+Let us explain the idea in the case of $m = 16$ as depicted in Matrix~\ref{eq:matrix}. 
+We can divide the matrix into $4 \times 4$ blocks and only use the four blocks 
+that are on the main diagonal. 
+%Let us for now just focus on soundness and return to the question of honest verifier 
+%zero-knowledge later. 
+The prover starts by sending $E_0, E_1, E_2, E_3,$ 
+$E_4, E_5, E_6$ that are the 
+products along the diagonals of the elements
+in the blocks that we are interested in. I.e., $E_0 = \Pi^4_{i=1} \vec{C}^{\vec{a}_{4i-3}}_{4i},...,
+E_6 = \Pi^4_{i=1} \vec{C}^{\vec{a}_{4i}}_{4i-3}$ and $E_3 = C$ (see Matrix~\ref{eq:matrix}). 
+The verifier sends a random challenge x and using the homomorphic properties of 
+the encryption scheme and ofthe commitment scheme both the prover and the verifier can compute
+$\vec{C}'_1,...,\vec{C}'_4$ and $c_{A'1},...,c_{A'4}$ as 
+
+\begin{equation}
+\vec{C}' = \vec{C}^{x^3}_{4i-3}
+\vec{C}^{x^2}_{4i-2} \vec{C}^x_{4i-1} \vec{C}_{4i}
+ \text{ \hspace{2cm} }
+c_{A'j} = c_{A_{4j-3}} c^x_{A_{4j-2}} c^{x^2}_{A_{4j-1}} c^{x^3}_{A_{4j}}
+\end{equation}
+
+
+%They can also both compute $C' = \Pi^6_{k=0} E^{x^k}_k$. 
+%The prover and the verifier now engage in an {\sc shvzk}%argument for the smaller statement 
+%$C = \Pi^4_{i=1} \vec{C}'^{\vec{a}'_i}$. 
+$C'$ represents the rows of interest in the blocks located on the
+main diagonal while $c_{A'_j}$ represents the commitment respectively.
+The prover can compute a witness for statement $C = \Pi^4_{i=1} \vec{C}'^{\vec{a}'_i}$ with
+$\vec{a}'_i = \vec{a}_{4i-3} + x\vec{a}_{4i-2} + x^2\vec{a}_{4i-1} + 
+x^3 \vec{a}_{4i}$; $a'_i$ represents the columns of interest in the blocks
+located on the main diagonal. This shows
+
+
+\begin{equation}
+\label{eq:diag}
+C^{x^3} \Pi^6_{i=1} E^{x^k}_{k=0, k \neq 3} = \Pi^4_{i=1}(\vec{C}^{x^3}_{4i-3}\vec{C}^{x^2}_{4i-2}\vec{C}^{x}_{4i-1}
+\vec{C}_{4i})^{(\vec{a}_{4i-3} + \vec{x}a_{4i-2} + \vec{x}^2_{a4i-1} + x^3a_{4i})}.\end{equation}
+
+
+The verifier computes the product across the main diagonal while the prover 
+computes the product across the blocks located on the main diagonal
+row by row as shown in equation~\ref{eq:diag}.
+A valid argument requires that these two products match.
+
+Looking at the $x^3$-related terms, we see there is negligible chance of the equation holding for a 
+random $x$ unless $\Pi^m_{i=1} \vec{C}^{\vec{a}^i}_i$ , which is what the prover 
+wanted to demonstrate.
+
+\begin{equation}
+\label{eq:matrix}
+\begin{pmatrix}
+\mathbf{\vec{C}^{\vec{a}_1}_1} & \vec{C}^{\vec{a}_2}_1 & \vec{C}^{\vec{a}_3}_1 & \vec{C}^{\vec{a}_4}_1
+ & & & & & & & & & & & & \\
+\vec{C}^{\vec{a}_1}_2 & \mathbf{\vec{C}^{\vec{a}_2}_2} & \vec{C}^{\vec{a}_3}_2 & \vec{C}^{\vec{a}_4}_2
+ & & & & & & & & & & & & \\
+\vec{C}^{\vec{a}_1}_3 & \vec{C}^{\vec{a}_2}_3 & \mathbf{\vec{C}^{\vec{a}_3}_3} & \vec{C}^{\vec{a}_4}_3
+ & & & & & & & & & & & & \\
+\vec{C}^{\vec{a}_1}_4 & \vec{C}^{\vec{a}_2}_4 & \vec{C}^{\vec{a}_3}_4 & \mathbf{\vec{C}^{\vec{a}_4}_4}
+ & & & & & & & & & & & & \\
+ & & & & \mathbf{\vec{C}^{\vec{a}_5}_5} & \vec{C}^{\vec{a}_6}_5 & \vec{C}^{\vec{a}_7}_5 & 
+  \vec{C}^{\vec{a}_8}_5 & & & & & & & & \\
+ & & & & \vec{C}^{\vec{a}_5}_6 & \mathbf{\vec{C}^{\vec{a}_6}_6} & \vec{C}^{\vec{a}_7}_6 & 
+ \vec{C}^{\vec{a}_8}_6 & & & & & & & & \\
+ & & & & \vec{C}^{\vec{a}_5}_7 & \vec{C}^{\vec{a}_6}_7 & \mathbf{\vec{C}^{\vec{a}_7}_7} & 
+ \vec{C}^{\vec{a}_8}_7 & & & & & & & & \\
+ & & & & \vec{C}^{\vec{a}_5}_8 & \vec{C}^{\vec{a}_6}_8 & \vec{C}^{\vec{a}_7}_8 & 
+ \mathbf{\vec{C}^{\vec{a}_8}_8} & & & & & & & & \\
+ & & & & & & & & \mathbf{\vec{C}^{\vec{a}_9}_9} & \vec{C}^{\vec{a}_{10}}_9 & \vec{C}^{\vec{a}_{11}}_9 & 
+ \vec{C}^{\vec{a}_{12}}_9 & & & & \\
+ & & & & & & & & \vec{C}^{\vec{a}_9}_{10} & \mathbf{\vec{C}^{\vec{a}_{10}}_{10}} & 
+ \vec{C}^{\vec{a}_{11}}_{10} & \vec{C}^{\vec{a}_{12}}_{10} & & & & \\
+ & & & & & & & & \vec{C}^{\vec{a}_9}_{11} & \vec{C}^{\vec{a}_{10}}_{11} & 
+ \mathbf{\vec{C}^{\vec{a}_{11}}_{11}} & \vec{C}^{\vec{a}_{12}}_{11} & & & & \\
+ & & & & & & & & \vec{C}^{\vec{a}_9}_{12} & \vec{C}^{\vec{a}_{10}}_{12} & \vec{C}^{\vec{a}_{11}}_{12} & 
+ \mathbf{\vec{C}^{\vec{a}_{12}}_{12}} & & & & \\
+ & & & & & & & & & & & & \mathbf{\vec{C}^{\vec{a}_{13}}_{13}} & \vec{C}^{\vec{a}_{14}}_{13} & 
+ \vec{C}^{\vec{a}_{15}}_{13} & \vec{C}^{\vec{a}_{16}}_{13} \\
+ & & & & & & & & & & & & \vec{C}^{\vec{a}_{13}}_{14} & \mathbf{\vec{C}^{\vec{a}_{14}}_{14}} & 
+ \vec{C}^{\vec{a}_{15}}_{14} & \vec{C}^{\vec{a}_{16}}_{14} \\
+ & & & & & & & & & & & & \vec{C}^{\vec{a}_{13}}_{15} & \vec{C}^{\vec{a}_{14}}_{15} & 
+ \mathbf{\vec{C}^{\vec{a}_{15}}_{15}} & \vec{C}^{\vec{a}_{16}}_{15} \\
+ & & & & & & & & & & & & \vec{C}^{\vec{a}_{13}}_{16} & \vec{C}^{\vec{a}_{14}}_{16} & 
+ \vec{C}^{\vec{a}_{15}}_{16} & \mathbf{\vec{C}^{\vec{a}_{16}}_{16}} \\
+\end{pmatrix}
+\end{equation}
+
+\begin{equation}
+E_0 = \Pi^4_{i=1} \vec{C}^{\vec{a}_{4i-3}}_{4i} \text{\hspace{8cm}} (\vec{C}^{\vec{a}_1}_4
+\vec{C}^{\vec{a}_5}_8\vec{C}^{\vec{a}_9}_{12}\vec{C}^{\vec{a}_{13}}_{16})
+\end{equation}
+\begin{equation}
+E_1 = \Pi^8_{i=1} \vec{C}^{\vec{a}_{4i-3}}_{4i-1} \text{\hspace{6cm}} (\vec{C}^{\vec{a}_1}_3
+\vec{C}^{\vec{a}_2}_4\vec{C}^{\vec{a}_5}_{7}\vec{C}^{\vec{a}_6}_8\vec{C}^{\vec{a}_9}_{11}
+\vec{C}^{\vec{a}_{10}}_{12}\vec{C}^{\vec{a}_{13}}_{15}\vec{C}^{\vec{a}_{14}}_{16})
+\end{equation}
+\begin{equation}
+E_2 = \Pi^{12}_{i=1} \vec{C}^{\vec{a}_{4i-3}}_{4i-2} \text{\hspace{2cm}} (\vec{C}^{\vec{a}_1}_2
+\vec{C}^{\vec{a}_2}_3\vec{C}^{\vec{a}_3}_4\vec{C}^{\vec{a}_4}_5\vec{C}^{\vec{a}_5}_6
+\vec{C}^{\vec{a}_6}_7\vec{C}^{\vec{a}_7}_8\vec{C}^{\vec{a}_8}_9\vec{C}^{\vec{a}_9}_{10}
+\vec{C}^{\vec{a}_{10}}_{11}\vec{C}^{\vec{a}_{11}}_{12}\vec{C}^{\vec{a}_{12}}_{13}
+\vec{C}^{\vec{a}_{13}}_{14}\vec{C}^{\vec{a}_{14}}_{15}\vec{C}^{\vec{a}_{15}}_{16})
+\end{equation}
+\begin{equation}
+E_3 = C = \Pi^{12}_{i=1} \vec{C}^{\vec{a}_{4i-3}}_{4i-3} \text{\hspace{3cm} (the main diagonal
+on the matrix -- in bold font)}
+\end{equation}
+\begin{equation}
+E_4 = \Pi^{12}_{i=1} \vec{C}^{\vec{a}_{4i-2}}_{4i-3} \text{\hspace{2cm}} (\vec{C}^{\vec{a}_2}_1
+\vec{C}^{\vec{a}_3}_2\vec{C}^{\vec{a}_4}_3\vec{C}^{\vec{a}_5}_4\vec{C}^{\vec{a}_6}_5
+\vec{C}^{\vec{a}_7}_6\vec{C}^{\vec{a}_8}_7\vec{C}^{\vec{a}_9}_8\vec{C}^{\vec{a}_{10}}_{9}
+\vec{C}^{\vec{a}_{11}}_{10}\vec{C}^{\vec{a}_{12}}_{11}\vec{C}^{\vec{a}_{13}}_{12}
+\vec{C}^{\vec{a}_{14}}_{13}\vec{C}^{\vec{a}_{15}}_{14}\vec{C}^{\vec{a}_{16}}_{15})
+\end{equation}
+\begin{equation}
+E_5 = \Pi^8_{i=1} \vec{C}^{\vec{a}_{4i-1}}_{4i-3} \text{\hspace{6cm}} (\vec{C}^{\vec{a}_3}_1
+\vec{C}^{\vec{a}_4}_2\vec{C}^{\vec{a}_7}_{5}\vec{C}^{\vec{a}_8}_6\vec{C}^{\vec{a}_{11}}_{9}
+\vec{C}^{\vec{a}_{12}}_{10}\vec{C}^{\vec{a}_{15}}_{13}\vec{C}^{\vec{a}_{16}}_{14})
+\end{equation}
+\begin{equation}
+E_6 = \Pi^4_{i=1} \vec{C}^{\vec{a}_{4i}}_{4i-3}  \text{\hspace{8cm}} (\vec{C}^{\vec{a}_4}_1
+\vec{C}^{\vec{a}_8}_5\vec{C}^{\vec{a}_{12}}_{9}\vec{C}^{\vec{a}_{16}}_{13})
+\end{equation}
+
+%TODONE(3): write this section
+
+\chapter{The product argument}
+
+%TODO: not now; leave empty and write than in your e-mail.
+% Acknowledgments
+
+\appendix
+
+%\chapter{Preliminaries}
+
+\chapter{Definitions of cryptographic concepts}
+\label{app:defs}
+
+\begin{description}
+
+\item \textbf{Shuffle} is a permutation.
+%        [and reencryption (of homomorphic encyptions of ciphertexts) - does shuffling imply reencryption?
+%        It doesn't seem so from the definition; check out shuffling in Wikipedia.
+%        But in the context of the paper I don't know.
+%       >> Communication operation: 
+%      >> Computation operation: 
+\item  \textbf{Mix-net} is a multi-party protocol which is used in e-voting or other 
+applications which require anonymity.
+It allows a group of senders to input a number of encrypted messages to the mix-net, which outputs 
+them in random order. It is common to construct mix-nets from shuffles.
+A common construction of mix-nets is to let the mix-servers take turns in shuffling the ciphertexts.
+If the encryption scheme is semantically secure a shuffle of ciphertexts output by a mix-server does not
+reveal the permutation of the messages. 
+However, this means that a malicious mix-server could substitute
+ciphertexts with encrypted votes for candidate X. 
+So, we use an interactive argument to verify the 
+correctness of a shuffle operation (soundeness), which reveals nothing about the permutation of 
+the randomizers used (zero-knowledge).
+
+\item \textbf{Zero-knowledge arguments} are used to verify the correctness of a shuffle operation 
+        (since the shuffle is done upon a set of ciphertexts).
+        
+\item \textbf{Homomorphic encryption} is a form of encryption which allows specific types of 
+computations to be performed on a ciphertext and produce
+an encrypted result, which when decrypted matches the result of operations performed on the
+plaintext.
+
+\item \textbf{Cyclic group} is a group that is generated by a single element g. 
+This element, g, is called the generator of the group. 
+It consists of a set of elements with an invertible associative operation, and it
+contains an element g such that any other element can be obtained from g by 
+repeatedly applying the group operation or its inverse to g.
+
+\item \textbf{Discrete logarithm}: let G be any group with its group operation denoted by multiplication. 
+Let b and g be any elements of G. Then any integer k that solves the $b^k = g$ is termed a discrete 
+logarithm of g to the base b.
+      
+\item \textbf{ElGamal encryption} is a type of partial homomorphic encryption;an 
+asymmetric key encryption algorithm for public-key cryptography based on the Diffie-Hellman 
+key exchange.
+ElGamal encryption can be defined over any cyclic group G. 
+Its security depends upon the difficulty of a specific problem in G related to computing 
+discrete logarithms. 
+ElGamal encruption consists of three components:
+\begin{itemize}
+
+\item the key generator
+\item the encryption algorithm
+\item the decryption algorithm
+        
+\end{itemize}
+
+The security of ElGamal encryption depends upon the characteristics of the selected group G.
+
+\item The \textbf{computational Diffie-Hellman assumption ({\sc cdh})} is the assumption that a certain 
+computational problem within a cyclic group is hard. 
+It is used to prove {\em confidentiality} of a cryptosystem.
+
+\item When we talk about \textbf{confidentiality} of information, we are talking about 
+protecting the information from disclosure to unauthorized parties.\footnote{
+Taken from http://security.blogoverflow.com/2012/08/confidentiality-integrity-availability-the-three-components-of-the-cia-triad/}
+A very key component of protecting information confidentiality would be encryption. 
+Encryption ensures that only the right people (people who knows the key) can read 
+the information. 
+Encryption is very widespread in today's environment and can be found in almost 
+every major protocol in use. 
+A very prominent example will be {\sc ssl/tls}, a security protocol for communications 
+over the internet that has been used in conjunction with a large number of internet 
+protocols to ensure security.
+
+\item The \textbf{decisional Diffie-Hellman assumption ({\sc ddh})} is a computational 
+hardness assumption about a problem
+involving discrete logarithms in cyclic groups. It is used to prove the security of many cryptographic
+protocols, most notably the ElGamal and the Cramer-Shoup cryptosystems. 
+The {\sc ddh} assumption states that given $g^a, g^b$ for uniformly and independently 
+chosen a,b belonging to $Z_q$ the value $g^{ab}$ looks 
+like a random element of G. {\sc ddh} is considered a stronger assumption than {\sc cdh}.
+If {\sc cdh} holds in the underlying cyclic group G, the encryption function is one-way 
+(easy to compute hard to invert).
+If {\sc ddh} holds in G, ElGamal achieves {\em semantic security}.
+To achieve chosen ciphertext attack security, the scheme has to be further modified or an appropriate 
+padding scheme must be used.
+
+\item In cryptography, a cryptosystem is \textbf{semantically secure} if any probabilistic, 
+polynomial-time algorithm ({\sc ppta}) that is given the ciphertext of a certain message m 
+(taken from any distribution of messages), and the message's length, cannot determine 
+any partial information on the message with probability non-negligibly higher than all other 
+{\sc ppta}'s that only have access to the message length (and not the ciphertext).\footnote{
+Taken from http://en.wikipedia.org/wiki/Semantic\_security}
+In other words, knowledge of the ciphertext (and length) of some unknown message 
+does not reveal any additional information on the message that can be feasibly extracted. 
+This concept is the computational complexity analogue to Shannon's concept of perfect secrecy. 
+Perfect secrecy means that the ciphertext reveals no information at all about the plaintext, 
+whereas semantic security implies that any information revealed cannot be feasibly extracted.
+
+\item \textbf{Confidentiality, semantic security, and perfect secrecy}.\footnote{
+Taken from http://crypto.stackexchange.com/questions/14321/perfect-secrecy-one-time-semantic-security-secure-prg}
+Note first that an adversary has some a priori knowledge of the message. 
+We can capture that by e.g. having the adversary choose two messages and 
+then flipping a fair coin to decide which one to encrypt.
+Next, note that the adversary wants to learn something from the ciphertext, 
+his a posteriori knowledge of the message. 
+We capture that by having the adversary guess which message was encrypted.
+If the adversary cannot guess correctly which message was encrypted with 
+probability significantly different from 1/2, then we have confidentiality.
+That was the definition of confidentiality.
+(More complex definitions are possible using a probability space and a function 
+from the message space to 0 and 1.)
+Perfect security is about confidentiality against arbitrary adversaries. 
+Now we can prove many theorems about perfect security, and one of them talks 
+about the number of keys taking a given message to a given ciphertext.
+Semantic security is about confidentiality against computationally bounded adversaries. 
+Unlike for perfect security, there aren't so many theorems we can prove about semantic security, 
+which means that we know less about what is required to achieve semantic security.
+So the difference between perfect and semantic security is just about which adversaries we 
+consider, nothing else.
+
+\item \textbf{Initialization vector} is a fixed-size input to a cryptographic primitive that is 
+required to be random or pseudo-random. 
+Randomization is crucial for encryption schemes to achieve semantic security that is 
+that repeated usage of the scheme under the same key does not allow an attacker to infer relationships 
+between segments of the encrypted message. 
+To hide patterns in encrypted data and to avoid using a new key
+for each block a method is needed to randomize the input data. 
+For this purpose, ciphertext from one block
+gets intermixed with ciphertext from another block. 
+To randomize the first block additional input is needed.
+This is where the initialization vector comes in handy. 
+For instance the Cipher-Block Chaining mode adds the
+initialization vector to the first plaintext block, the first produced ciphertext block to the second 
+plaintext block, and so on. The ultimate goal is semantic security. 
+For more see initialization vector:motivation in Wikipedia.
+
+\item A \textbf{commitment scheme} allows one to commit to a chosen value, 
+while keeping it hidden to others, with the ability to reveal the committed value later. 
+Commitment schemes are designed so that a party cannot change
+the value of statement after they have committed to it; that is commitment schemes are 
+binding. 
+You can see the rock-paper-scissors example in Wikipedia under commitment scheme entry.
+
+\end{description}
+
+
+% Bibliography
+\bibliographystyle{plain}
+\bibliography{minimal-shuffle-doc}
+
+
+\end{document}
