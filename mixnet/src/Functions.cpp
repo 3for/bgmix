@@ -61,45 +61,31 @@ void Functions::read_config(map<string,long> & num, ZZ & genq) {
 		getline(iss, token, '=');
 		if (token == "optimization_method") {
 			getline(iss, token, '=');
-			num.insert(pair<string,long>(
-					"optimization_method",
-					tolong(token)));
+			num["optimization_method"] = tolong(token);
 		} else if (token == "number_of_ciphertexts") {
 			getline(iss, token, '=');
-			num.insert(pair<string,long>(
-					"number_of_ciphertexts", 
-					tolong(token)));
+			num["number_of_ciphertexts"] = tolong(token);
 		} else if (token == "ciphertext_matrix_rows") {
 			getline(iss, token, '=');
-			num.insert(pair<string,long>(
-					"ciphertext_matrix_rows", 
-					tolong(token)));
+			num["ciphertext_matrix_rows"] = tolong(token);
 		} else if (token == "ciphertext_matrix_columns") {
 			getline(iss, token, '=');
-			num.insert(pair<string,long>(
-					"ciphertext_matrix_columns", 
-					tolong(token)));
+			num["ciphertext_matrix_columns"] = tolong(token);
 		} else if (token == "window_size_multi_exponentiation") {
 			getline(iss, token, '=');
-			num.insert(pair<string,long>(
-					"window_size_multi_exponentiation", 
-					tolong(token)));
+			num["window_size_multi_exponentiation"] = tolong(token);
 		} else if (token == "window_size_multi_exponentiation_lim_lee"){
 			getline(iss, token, '=');
-			num.insert(pair<string,long>(
-				"window_size_multi_exponentiation_lim_lee", 
-					tolong(token)));
+			num["window_size_multi_exponentiation_lim_lee"] = 
+								tolong(token);
 		} else if (token ==  
 				 "window_size_multi_exponentiation_brickels") {
 			getline(iss, token, '=');
-			num.insert(pair<string,long>(
-				"window_size_multi_exponentiation_brickels", 
-					tolong(token)));
+			num["window_size_multi_exponentiation_brickels"] = 
+								tolong(token);
 		} else if (token == "modular_groups") {
 			getline(iss, token, '=');
-			num.insert(pair<string,long>(
-					"modular_groups", 
-					tolong(token)));
+			num["modular_groups"] = tolong(token);
 		} else if (token == "group_description_file_name") {
 			getline(iss, token, '=');
 			group_description_file_name.assign(token);
