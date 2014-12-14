@@ -7,7 +7,8 @@
 
 #include "Verifier_toom.h"
 
-#include<vector>
+#include <vector>
+#include <map>
 #include "Cipher_elg.h"
 #include "G_q.h"
 #include "Mod_p.h"
@@ -35,14 +36,13 @@ Verifier_toom::Verifier_toom() {
 }
 
 
-Verifier_toom::Verifier_toom(vector<long> num) {
+Verifier_toom::Verifier_toom(map<string, long> num) {
 	// sets the values of the matrix according to the input
-	m = num[1]; //number of rows
-	n = num[2]; //number of columns
-	omega = num[3]; //windowsize for multi-expo-technique
-	omega_sw = num[4]; //windowsize for multi-expo-technique sliding window and LL
-	omega_LL = num[7]; //windowsize for multi-expo-technique of LL
-
+	m = num["ciphertext_matrix_rows"]; //number of rows
+	n = num["ciphertext_matrix_columns"]; //number of columns
+	omega = num["window_size_multi_exponentiation_brickels"]; //windowsize for multi-expo-technique
+	omega_sw = num["window_size_multi_exponentiation"]; //windowsize for multi-expo-technique sliding window and LL
+	omega_LL = num["window_size_multi_exponentiation_lim_lee"]; //windowsize for multi-expo-technique of LL
 
 	c_A = new vector<Mod_p>(m+1); //allocate the storage for the commitments of Y
 	c_B = new vector<Mod_p>(m); //allocate the storage for the commitments of T
@@ -413,7 +413,7 @@ ZZ Verifier_toom:: round_10(string in_name,vector<vector<Cipher_elg>* >* enc, ve
 											//Check the the reencryption of the E_c is correct
 											b = check_ac();
 											if(b==1){
-												//cout<<"Accept!";
+												cout << "Accept!" << endl;
 											}
 										}
 									}

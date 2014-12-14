@@ -8,7 +8,8 @@
 #ifndef VERIFIER_TOOM_H_
 #define VERIFIER_TOOM_H_
 
-#include<vector>
+#include <vector>
+#include <map>
 #include "Cipher_elg.h"
 #include "G_q.h"
 #include "Mod_p.h"
@@ -89,7 +90,7 @@ private:
 
 public:
 	Verifier_toom();
-	Verifier_toom(vector<long> num);
+	Verifier_toom(map<string, long> num);
 	virtual ~Verifier_toom();
 
 	//Stores the commitments to matrix Y and sends challenges vector s_1 and s_2 to the prover

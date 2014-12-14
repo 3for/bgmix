@@ -8,7 +8,8 @@
 
 #include "Prover.h"
 
-#include<vector>
+#include <vector>
+#include <map>
 #include "Cipher_elg.h"
 #include "G_q.h"
 #include "Mod_p.h"
@@ -30,11 +31,13 @@ Prover::Prover() {
 
 }
 
-Prover::Prover(vector<vector<Cipher_elg>* >* Cin, vector<vector<ZZ>* >* Rin, vector<vector<vector<long>* >* >* piin, vector<long> num, ZZ genq){
+Prover::Prover(vector<vector<Cipher_elg>* >* Cin, vector<vector<ZZ>* >* Rin, 
+		vector<vector<vector<long>* >* >* piin, 
+		map<string, long> num, ZZ genq){
 
 	// set the dimensions of the row and columns according to the user input
-	m = num[1]; //number of rows
-	n = num[2]; //number of columns
+	m = num["ciphertext_matrix_rows"]; //number of rows
+	n = num["ciphertext_matrix_columns"]; //number of columns
 	C = Cin; //sets the reencrypted cipertexts to the input
 	R = Rin; //sets the random elements to the input
 	pi = piin; // sets the permutation to the input

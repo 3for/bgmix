@@ -11,7 +11,8 @@
 #ifndef FUNCTIONS_H_
 #define FUNCTIONS_H_
 
-#include<vector>
+#include <vector>
+#include <map>
 #include "G_q.h"
 #include "Mod_p.h"
 #include "Cipher_elg.h"
@@ -27,17 +28,26 @@ public:
 	Functions();
 	virtual ~Functions();
 	//read the config file and sets the parameters and the groups
-	static void read_config(vector<long> & num, ZZ & genq);
+	static void read_config(map<string, long> & num, ZZ & genq);
 
 	//generates N=num[0] different ciphertexts
-	static vector<vector<Cipher_elg>* >*  createCipher(vector<long> num);
-	static  void createCipher(vector<vector<Cipher_elg>* >* e, vector<long> num);
+	static vector<vector<Cipher_elg>* >*  createCipher(
+						map<string, long> num);
+	static  void createCipher(vector<vector<Cipher_elg>* >* e, 
+							map<string, long> num);
 	//generates a matrix of random elements
-	static vector<vector<ZZ>* >* randomEl(vector<long> num);
-	static void randomEl( vector<vector<ZZ>*>* R, vector<long> num);
+	static vector<vector<ZZ>* >* randomEl(map<string, long> num);
+	static void randomEl( vector<vector<ZZ>*>* R, map<string, long> num);
 	//reencrypts the ciphertexts e using the permutation pi and random elements R
-	static vector<vector<Cipher_elg>* >*  reencryptCipher( vector<vector<Cipher_elg>* >* e, vector<vector<vector<long>* >* >* pi, vector<vector<ZZ>*>* R, vector<long> num);
-	static  void reencryptCipher( vector<vector<Cipher_elg>* >* E, vector<vector<Cipher_elg>* >* e, vector<vector<vector<long>* >* >* pi, vector<vector<ZZ>*>* R, vector<long> num);
+	static vector<vector<Cipher_elg>* >*  reencryptCipher(
+				vector<vector<Cipher_elg>* >* e, 
+				vector<vector<vector<long>* >* >* pi, 
+				vector<vector<ZZ>*>* R, map<string, long> num);
+	static  void reencryptCipher(vector<vector<Cipher_elg>* >* E, 
+					vector<vector<Cipher_elg>* >* e, 
+					vector<vector<vector<long>* >* >* pi, 
+					vector<vector<ZZ>*>* R, 
+					map<string, long> num);
 	//returns the Hadamard product of x and y
 	static void Hadamard( vector<ZZ>* ret, vector<ZZ>* x, vector<ZZ>* y);
 	//Calculates the bilinear map Z^n x Z^ -> Z: x(y¡t)^T

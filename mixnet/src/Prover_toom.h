@@ -10,7 +10,8 @@
 #ifndef PROVER_TOOM_H_
 #define PROVER_TOOM_H_
 
-#include<vector>
+#include <vector>
+#include <map>
 #include "Cipher_elg.h"
 #include "G_q.h"
 #include "Mod_p.h"
@@ -122,7 +123,7 @@ class Prover_toom {
 
 public:
 	Prover_toom();
-	Prover_toom(vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R, vector<vector<vector<long>* >* >* pi, vector<long> num, ZZ genq);
+	Prover_toom(vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R, vector<vector<vector<long>* >* >* pi, map<string, long> num, ZZ genq);
 	virtual ~Prover_toom();
 
 	//round_1 calculates and returns the commitment to the row in Y

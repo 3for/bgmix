@@ -34,13 +34,13 @@ Verifier_me::Verifier_me() {
 
 
 
-Verifier_me::Verifier_me(vector<long> num) {
+Verifier_me::Verifier_me(map<string, long> num) {
 	// sets the values of the matrix according to the input
-	m = num[1]; //number of rows
-	n = num[2]; //number of columns
-	omega = num[3]; //windowsize for multi-expo-technique
-	omega_sw = num[4]; //windowsize for multi-expo-technique sliding window
-	omega_LL = num[7]; //windowsize for multi-expo-techniqueof Lim and Lee
+	m = num["ciphertext_matrix_rows"]; //number of rows
+	n = num["ciphertext_matrix_columns"]; //number of columns
+	omega = num["window_size_multi_exponentiation_brickels"]; //windowsize for multi-expo-technique
+	omega_sw = num["window_size_multi_exponentiation"]; //windowsize for multi-expo-technique sliding window
+	omega_LL = num["window_size_multi_exponentiation_lim_lee"]; //windowsize for multi-expo-techniqueof Lim and Lee
 
 	c_A = new vector<Mod_p>(m+1); //allocate the storage for the commitments of Y
 	c_B = new vector<Mod_p>(m); //allocate the storage for the commitments of T

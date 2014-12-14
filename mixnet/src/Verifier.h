@@ -11,7 +11,8 @@
 #define VERIFIER_H_
 
 
-#include<vector>
+#include <vector>
+#include <map>
 #include "Cipher_elg.h"
 #include "G_q.h"
 #include "Mod_p.h"
@@ -74,7 +75,7 @@ private:
 public:
 	// Constructors and Destructor
 	Verifier();
-	Verifier(vector<long> num);
+	Verifier(map<string, long> num);
 	virtual ~Verifier();
 	//Stores the commitments to matrix Y and sends challenges vector s_1 and s_2 to the prover
 	string round_2(string name);

@@ -32,16 +32,19 @@ Prover_fft::Prover_fft() {
 
 }
 
-Prover_fft::Prover_fft(vector<vector<Cipher_elg>* >* Cin,  vector<vector<ZZ>*>* Rin, vector<vector<vector<long>* >* >* piin, vector<long> num, ZZ gen){
+Prover_fft::Prover_fft(vector<vector<Cipher_elg>* >* Cin,
+			vector<vector<ZZ>*>* Rin, 
+			vector<vector<vector<long>* >* >* piin, 
+			map<string, long> num, ZZ gen){
 
 	// set the dimensions of the row and columns according to the user input
-	m = num[1]; //number of rows
-	n = num[2]; //number of columns
+	m = num["ciphertext_matrix_rows"]; //number of rows
+	n = num["ciphertext_matrix_columns"]; //number of columns
 	C = Cin; //sets the reencrypted cipertexts to the input
 	R = Rin; //sets the random elements to the input
 	pi = piin; // sets the permutation to the input
-	omega_mulex = num[3]; //windowsize for sliding-window technique
-	omega_sw = num[4]; //windowsize for multi-expo technique
+	omega_mulex = num["window_sizemulti_exponentiation_brickels"]; //windowsize for sliding-window technique
+	omega_sw = num["window_size_multi_exponentiation"]; //windowsize for multi-expo technique
 
 
 	fft *fft_new = new fft;

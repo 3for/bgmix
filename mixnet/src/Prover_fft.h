@@ -8,7 +8,8 @@
 #ifndef PROVER_FFT_H_
 #define PROVER_FFT_H_
 
-#include<vector>
+#include <vector>
+#include <map>
 #include "Cipher_elg.h"
 #include "G_q.h"
 #include "Mod_p.h"
@@ -106,7 +107,10 @@ private:
 
 public:
 	Prover_fft();
-	Prover_fft(vector<vector<Cipher_elg>* >* C,  vector<vector<ZZ>*>* R, vector<vector<vector<long>* >* >* pi, vector<long> num, ZZ genq);
+	Prover_fft(vector<vector<Cipher_elg>* >* C,
+			vector<vector<ZZ>*>* R, 
+			vector<vector<vector<long>* >* >* pi, 
+			map<string, long> num, ZZ genq);
 	virtual ~Prover_fft();
 
 	//round_1 calculates and returns the commitment to the row in Y

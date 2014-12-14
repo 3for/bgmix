@@ -31,10 +31,10 @@ Verifier::Verifier() {
 
 }
 
-Verifier::Verifier(vector<long> num) {
+Verifier::Verifier(map<string, long> num) {
 	// sets the values of the matrix according to the input
-	m = num[1]; //number of rows
-	n = num[2]; //number of columns
+	m = num["ciphertext_matrix_rows"]; //number of rows
+	n = num["ciphertext_matrix_columns"]; //number of columns
 
 	c_A = new vector<Mod_p>(m+1); //allocate the storage for the commitments of Y
 	c_B = new vector<Mod_p>(m); //allocate the storage for the commitments of T

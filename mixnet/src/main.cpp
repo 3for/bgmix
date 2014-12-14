@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <vector>
+#include <map> // map<string,long> num
 #include <fstream>
 
 #include "G_q.h"
@@ -42,15 +43,15 @@ NTL_CLIENT
  long mu=0; //number of rows after reduction
  long mu_h=0;//2*mu-1, number of extra elements in the reduction
 
- int shuffle_wo_opti(vector<vector<Cipher_elg>* >* e,vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, vector<long> num, ZZ genq);
- int shuffle_w_opti_me(vector<vector<Cipher_elg>* >* e, vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, vector<long> num);
- int shuffle_w_opti(vector<vector<Cipher_elg>* >* e, vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, vector<long> num, ZZ genq);
- int shuffle_w_toom(vector<vector<Cipher_elg>* >* e, vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, vector<long> num, ZZ genq);
+ int shuffle_wo_opti(vector<vector<Cipher_elg>* >* e,vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, map<string, long> num, ZZ genq);
+ int shuffle_w_opti_me(vector<vector<Cipher_elg>* >* e, vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, map<string, long> num);
+ int shuffle_w_opti(vector<vector<Cipher_elg>* >* e, vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, map<string, long> num, ZZ genq);
+ int shuffle_w_toom(vector<vector<Cipher_elg>* >* e, vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, map<string, long> num, ZZ genq);
 
 
  int main(){
 	int i;
-	vector<long> num; //Containing the number of ciphertexts and the structure of the matrix of the ciphertexts
+	map<string,long> num; //Containing the number of ciphertexts and the structure of the matrix of the ciphertexts
 	vector<vector<Cipher_elg>* >* c=0; // contains the original input ciphertexts
 	vector<vector<Cipher_elg>* >* C=0;//Contains reencryptetd ciphers
 	vector<vector<vector<long>* >* > * pi=0; //Permutation
@@ -62,16 +63,18 @@ NTL_CLIENT
 
 	time_p = 0;
 	time_v = 0;
-	num=vector<long>(8);
+	//num=map(pair<string,long>)(8); 
 	Functions::read_config(num, genq);
 
 	 
 	 
-	 m = num[1];
-	 n = num[2];
+	 m = num["ciphertext_matrix_rows"];
+	 n = num["ciphertext_matrix_columns"];
 
 	 Ped = Pedersen(n, G);
-	 Ped.set_omega(num[3], num[7], num[4]);
+	 Ped.set_omega(num["window_size_multi_exponentiation_brickels"], 
+			num["window_size_multi_exponentiation_lim_lee"], 
+			num["window_size_multi_exponentiation"]);
 
 	c =new vector<vector<Cipher_elg>* >(m);
 
@@ -87,18 +90,18 @@ NTL_CLIENT
 	ttime= tstop-tstart;
 	cout << "To shuffle the ciphertexts took " << ttime << " second(s)." << endl;
 
-	if(num[5]==0){
+	if(num["optimization_method"]==0){
 		shuffle_wo_opti(c,C,R, pi, num, genq);
 	}
-	else if(num[5]==1){
+	else if(num["optimization_method"]==1){
 		cout<<"Multi-expo version:"<<endl;
 		shuffle_w_opti_me(c,C,R, pi, num);
 	}
-	else if(num[5]==2){
+	else if(num["optimization_method"]==2){
 		cout<<"FFT:"<<endl;
 		shuffle_w_opti(c,C,R, pi, num, genq);
 	} 
-	else if(num[5]==3){
+	else if(num["optimization_method"]==3){
 		cout<<"Toom-Cook and Interaction:"<<endl;
 		shuffle_w_toom(c,C,R, pi, num, genq);
 	}
@@ -110,7 +113,11 @@ NTL_CLIENT
 }
 
 
-int shuffle_wo_opti(vector<vector<Cipher_elg>* >* c, vector<vector<Cipher_elg>* >* C, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, vector<long> num, ZZ genq){
+int shuffle_wo_opti(vector<vector<Cipher_elg>* >* c, 
+			vector<vector<Cipher_elg>* >* C, 
+			vector<vector<ZZ>*>* R,
+			vector<vector<vector<long>* >* > * pi, 
+			map<string, long> num, ZZ genq) {
 	Prover* P=0;
 	Verifier* V=0;
 	P = new Prover(C,R,pi,num, genq);
@@ -197,7 +204,11 @@ file_name = V-> round_8(file_name);
 }
 
 
-int shuffle_w_opti_me(vector<vector<Cipher_elg>* >* c, vector<vector<Cipher_elg>* >* C, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, vector<long> num){
+int shuffle_w_opti_me(vector<vector<Cipher_elg>* >* c, 
+			vector<vector<Cipher_elg>* >* C, 
+			vector<vector<ZZ>*>* R,
+			vector<vector<vector<long>* >* > * pi, 
+			map<string, long> num) {
 	Prover_me* P=0;
 	Verifier_me* V=0;
 	double tstart, tstart_t, tstop,tstop_t, ttime, time_p, time_v;
@@ -284,7 +295,11 @@ chal_10 = V->round_10(file_name, c, C);
 	return 1;
 }
 
-int shuffle_w_opti(vector<vector<Cipher_elg>* >* c, vector<vector<Cipher_elg>* >* C, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, vector<long> num, ZZ gen){
+int shuffle_w_opti(vector<vector<Cipher_elg>* >* c, 
+			vector<vector<Cipher_elg>* >* C, 
+			vector<vector<ZZ>*>* R,
+			vector<vector<vector<long>* >* > * pi, 
+			map<string, long> num, ZZ gen) {
 	Prover_fft* P=0;
 	Verifier_me* V=0;
 	double tstart, tstart_t, tstop,tstop_t, ttime, time_p, time_v;
@@ -374,8 +389,11 @@ file_name = V-> round_8(file_name);
 }
 
 
-int shuffle_w_toom(vector<vector<Cipher_elg>* >* c, vector<vector<Cipher_elg>* >* C, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, vector<long> num, ZZ gen){
-
+int shuffle_w_toom(vector<vector<Cipher_elg>* >* c, 
+			vector<vector<Cipher_elg>* >* C, 
+			vector<vector<ZZ>*>* R,
+			vector<vector<vector<long>* >* > * pi, 
+			map<string, long> num, ZZ gen) {
 	Prover_toom* P=0;
 	Verifier_toom* V=0;
 	double tstart, tstart_t, tstop,tstop_t, ttime, time_p, time_v;
@@ -384,7 +402,7 @@ int shuffle_w_toom(vector<vector<Cipher_elg>* >* c, vector<vector<Cipher_elg>* >
 	ofstream ost;
 	mu = 4;
 	mu_h = 2*mu-1;
-	m_r = num[1]/mu;
+	m_r = num["ciphertext_matrix_rows"]/mu;
 	P = new Prover_toom(C,R,pi,num, gen);
 	V = new Verifier_toom(num);
 

@@ -7,7 +7,8 @@
 
 #include "Prover_me.h"
 
-#include<vector>
+#include <vector>
+#include <map>
 #include "Cipher_elg.h"
 #include "G_q.h"
 #include "Mod_p.h"
@@ -29,14 +30,17 @@ Prover_me::Prover_me() {
 
 }
 
-Prover_me::Prover_me(vector<vector<Cipher_elg>* >* Cin, vector<vector<ZZ>*>* Rin, vector<vector<vector<long>* >* >* piin, vector<long> num){
+Prover_me::Prover_me(vector<vector<Cipher_elg>* >* Cin, 
+			vector<vector<ZZ>*>* Rin, 
+			vector<vector<vector<long>* >* >* piin, 
+			map<string, long> num){
 	// set the dimensions of the row and columns according to the user input
-	m = num[1]; //number of rows
-	n = num[2]; //number of columns
+	m = num["ciphertext_matrix_rows"]; //number of rows
+	n = num["ciphertext_matrix_columns"]; //number of columns
 	C = Cin; //sets the reencrypted cipertexts to the input
 	R = Rin; //sets the random elements to the input
 	pi = piin; // sets the permutation to the input
-	omega = num[3]; //windowsize for multi-expo
+	omega = num["window_size_multi_exponentiation_brickels"]; //windowsize for multi-expo
 
 	//Creates the matrixs X, containing 1 to N
 	A = new vector<vector<ZZ>* >(m);

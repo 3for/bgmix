@@ -8,7 +8,8 @@
 #ifndef PROVER_ME_H_
 #define PROVER_ME_H_
 
-#include<vector>
+#include <vector>
+#include <map>
 #include "Cipher_elg.h"
 #include "G_q.h"
 #include "Mod_p.h"
@@ -108,7 +109,10 @@ private:
 public:
 
 	Prover_me();
-	Prover_me(vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R, vector<vector<vector<long>* >* >* pi, vector<long> num);
+	Prover_me(vector<vector<Cipher_elg>* >* E, 
+			vector<vector<ZZ>*>* R, 
+			vector<vector<vector<long>* >* >* pi, 
+			map<string, long> num);
 	virtual ~Prover_me();
 
 

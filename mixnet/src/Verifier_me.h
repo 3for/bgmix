@@ -8,7 +8,8 @@
 #ifndef VERIFIER_ME_H_
 #define VERIFIER_ME_H_
 
-#include<vector>
+#include <vector>
+#include <map>
 #include "Cipher_elg.h"
 #include "G_q.h"
 #include "Mod_p.h"
@@ -76,7 +77,7 @@ private:
 
 public:
 	Verifier_me();
-	Verifier_me(vector<long> num);
+	Verifier_me(map<string, long> num);
 	virtual ~Verifier_me();
 
 	//Stores the commitments to matrix Y and sends challenges vector s_1 and s_2 to the prover

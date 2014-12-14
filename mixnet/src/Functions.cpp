@@ -14,12 +14,14 @@
 #include <NTL/ZZ.h>
 NTL_CLIENT
 
-#include<vector>
-using namespace std;
+#include <vector>
+#include <map>
+#include <string>
 #include <iostream>
+#include <sstream>
+using namespace std;
 #include <time.h>
 #include <fstream>
-#include <sstream>
 
 extern G_q G;
 extern G_q H;
@@ -36,10 +38,15 @@ Functions::~Functions() {
 }
 
 
-void Functions::read_config(vector<long> & num, ZZ & genq){
+void Functions::read_config(map<string,long> & num, ZZ & genq) {
 	ifstream ist, ist1;
 	string name;
 	string line;
+	string token;
+	string group_description_file_name;
+	string number_of_bits_prime_order_q;
+	string number_of_bits_prime_p;
+	string number_of_bits_prime_p1;
 	vector<string> lines;
 	vector<ZZ>* pq;
 	ZZ ran;
@@ -47,99 +54,102 @@ void Functions::read_config(vector<long> & num, ZZ & genq){
 
 	name = "config";
 	ist.open (name.c_str());
-	if(!ist1) cout<<"Can't open "<< name.c_str();
+	if (!ist1) cout << "Can't open " << name.c_str();
 
-	for(i=1; i<12; i++){
-		getline(ist, line);
+	while (getline(ist, line)) {
+		istringstream iss(line);
+		getline(iss, token, '=');
+		if (token == "optimization_method") {
+			getline(iss, token, '=');
+			num.insert(pair<string,long>(
+					"optimization_method",
+					tolong(token)));
+		} else if (token == "number_of_ciphertexts") {
+			getline(iss, token, '=');
+			num.insert(pair<string,long>(
+					"number_of_ciphertexts", 
+					tolong(token)));
+		} else if (token == "ciphertext_matrix_rows") {
+			getline(iss, token, '=');
+			num.insert(pair<string,long>(
+					"ciphertext_matrix_rows", 
+					tolong(token)));
+		} else if (token == "ciphertext_matrix_columns") {
+			getline(iss, token, '=');
+			num.insert(pair<string,long>(
+					"ciphertext_matrix_columns", 
+					tolong(token)));
+		} else if (token == "window_size_multi_exponentiation") {
+			getline(iss, token, '=');
+			num.insert(pair<string,long>(
+					"window_size_multi_exponentiation", 
+					tolong(token)));
+		} else if (token == "window_size_multi_exponentiation_lim_lee"){
+			getline(iss, token, '=');
+			num.insert(pair<string,long>(
+				"window_size_multi_exponentiation_lim_lee", 
+					tolong(token)));
+		} else if (token ==  
+				 "window_size_multi_exponentiation_brickels") {
+			getline(iss, token, '=');
+			num.insert(pair<string,long>(
+				"window_size_multi_exponentiation_brickels", 
+					tolong(token)));
+		} else if (token == "modular_groups") {
+			getline(iss, token, '=');
+			num.insert(pair<string,long>(
+					"modular_groups", 
+					tolong(token)));
+		} else if (token == "group_description_file_name") {
+			getline(iss, token, '=');
+			group_description_file_name.assign(token);
+		} else if (token == "number_of_bits_prime_order_q") {
+			getline(iss, token, '=');
+			number_of_bits_prime_order_q.assign(token);
+		} else if (token == "number_of_bits_prime_p") {
+			getline(iss, token, '=');
+			number_of_bits_prime_p.assign(token);
+		} else if (token == "number_of_bits_prime_p1") {
+			getline(iss, token, '=');
+			number_of_bits_prime_p1.assign(token);
+		}
 	}
-	getline(ist, line);
-	num[5]=tolong(line);
-
-	for(i=1; i<=2; i++){
-		getline(ist, line);
-	}
-	getline(ist, line);
-	num[0]=tolong(line);
-
-	for(i=1; i<=3; i++){
-		getline(ist, line);
-	}
-	getline(ist, line);
-	num[1]=tolong(line);
-	getline(ist, line);
-	num[2]=tolong(line);
-
-	for(i=1; i<=2; i++){
-		getline(ist, line);
-	}
-	getline(ist, line);
-	num[4]=tolong(line);
-
-	for(i=1; i<=2; i++){
-		getline(ist, line);
-	}
-	getline(ist, line);
-	num[7]=tolong(line);
-
-	for(i=1; i<=2; i++){
-		getline(ist, line);
-	}
-	getline(ist, line);
-	num[3]=tolong(line);
-
-	for(i=1; i<=4; i++){
-		getline(ist, line);
-	}
-	getline(ist, line);
-	num[6]=tolong(line);
-
-	for(i=1; i<=5; i++){
-		getline(ist, line);
-	}
-	getline(ist, line);
-	if(line != "0"){
-		cout<<"if ";
-		ist.close();
-		if(num[6]==0){
-			pq= new vector<ZZ>(4);
-			ifstream ist1(line.c_str(), ios::in);
-			if(!ist1) cout<<"Can't open "<< line.c_str();
-			for (i = 0; i<4; i++){
-				ist1>> pq->at(i);
+	ist.close();
+	if (group_description_file_name != "0") {
+		cout << "if ";
+		if (num["modular_groups"] == 0) {
+			pq = new vector<ZZ>(4);
+			ifstream ist1(group_description_file_name.c_str(), 
+								ios::in);
+			if (!ist1) cout << "Can't open " << token.c_str();
+			for (i = 0; i < 4; i++) {
+				ist1 >> pq->at(i);
 			}
 			ist1.close();
-			cout<<NumBits(pq->at(1))<<" "<<NumBits(pq->at(0))<<endl;
+			cout << NumBits(pq->at(1)) << " " <<
+				NumBits(pq->at(0)) << endl;
 			G = G_q(pq->at(2), pq->at(1), pq->at(0));
 			H = G_q(pq->at(2), pq->at(1), pq->at(0));
-		}
-		else{
-			pq= new vector<ZZ>(6);
+		} else {
+			pq = new vector<ZZ>(6);
 			ifstream ist1(line.c_str(), ios::in);
-			if(!ist1) cout<<"Can't open "<< line.c_str();
-			for (i = 0; i<6; i++){
-				ist1>> pq->at(i);
+			if (!ist1) cout << "Can't open " << line.c_str();
+			for (i = 0; i < 6; i++) {
+				ist1 >> pq->at(i);
 			}
 			ist1.close();
-			cout<<NumBits(pq->at(1))<<" "<<NumBits(pq->at(0))<<" "<<NumBits(pq->at(4))<<endl;
+			cout << NumBits(pq->at(1)) << " " <<
+				NumBits(pq->at(0)) << " " <<
+				NumBits(pq->at(4)) << endl;
 			G = G_q(pq->at(2), pq->at(1), pq->at(0));
 			H = G_q(pq->at(5), pq->at(1), pq->at(4));
 		}
-	}
-	else{
-		if(num[6]==0){
-			for(i=1; i<=2; i++){
-				getline(ist, line);
-			}
-			getline(ist, line);
-			lq=tolong(line);
+	} else {
+		if (num["modular_groups"] == 0) {
+			lq = tolong(number_of_bits_prime_order_q);
+			lp = tolong(number_of_bits_prime_p);
 
-			for(i=1; i<=2; i++){
-				getline(ist, line);
-			}
-			getline(ist, line);
-			lp=tolong(line);
-
-			pq= new vector<ZZ>(4);
+			pq = new vector<ZZ>(4);
 
 			SetSeed(to_ZZ(time(0)));
 			//find_group(pq, lq, lp, num[1]);
@@ -148,43 +158,24 @@ void Functions::read_config(vector<long> & num, ZZ & genq){
 
 			G = G_q(pq->at(2), pq->at(1), pq->at(0));
 			H = G_q(pq->at(2), pq->at(1), pq->at(0));
-		}
-		else{
-			cout<<"else ";
-			for(i=1; i<=2; i++){
-				getline(ist, line);
-			}
-			getline(ist, line);
-			lq=tolong(line);
+		} else {
+			cout << "else ";
 
-			for(i=1; i<=2; i++){
-				getline(ist, line);
-			}
-			getline(ist, line);
-			lp=tolong(line);
+			lq = tolong(number_of_bits_prime_order_q);
+			lp = tolong(number_of_bits_prime_p);
+			lp1 = tolong(number_of_bits_prime_p1);
 
-			for(i=1; i<=2; i++){
-				getline(ist, line);
-			}
-			getline(ist, line);
-			lp1=tolong(line);
-
-			pq= new vector<ZZ>(6);
+			pq = new vector<ZZ>(6);
 
 			SetSeed(to_ZZ(time(0)));
-			find_groups(pq, lq, lp, lp1, num[1] );
+			find_groups(pq, lq, lp, lp1, 
+					num["ciphertext_matrix_rows"]);
 			//find_groups(pq, lq, lp, lp1, 262144 );
 
 			G = G_q(pq->at(2), pq->at(1), pq->at(0));
 			H = G_q(pq->at(5), pq->at(1), pq->at(4));
-
 		}
-
-		ist.close();
 	}
-
-
-
 	El.set_group(H);
 	ran = RandomBnd(H.get_ord());
 	El.set_sk(ran);
@@ -218,10 +209,10 @@ string Functions::tostring(long n){
 
 
 //Creates a matrix of N random elements, if N<n*m 1 is encrypted in the last elements
-vector<vector<Cipher_elg>* >* Functions:: createCipher(vector<long> num){
-	long N = num[0];
-	long m = num[1];
-	long n = num[2];
+vector<vector<Cipher_elg>* >* Functions:: createCipher(map<string, long> num){
+	long N = num["number_of_ciphertexts"];
+	long m = num["ciphertext_matrix_rows"];
+	long n = num["ciphertext_matrix_columns"];
 	vector<vector<Cipher_elg>* >* C=new vector<vector<Cipher_elg>* >(m);
 	vector<Cipher_elg>* r = 0;
 	Cipher_elg temp;
@@ -261,10 +252,11 @@ ost.close();
 	return C;
 }
 
-void Functions:: createCipher(vector<vector<Cipher_elg>* >* C, vector<long> num){
-	long N = num[0];
-	long m = num[1];
-	long n = num[2];
+void Functions:: createCipher(vector<vector<Cipher_elg>* >* C, 
+							map<string, long> num) {
+	long N = num["number_of_ciphertexts"];
+	long m = num["ciphertext_matrix_rows"];
+	long n = num["ciphertext_matrix_columns"];
 	vector<Cipher_elg>* r = 0;
 	Cipher_elg temp;
 	ZZ ran_2,ord;
@@ -310,9 +302,9 @@ void Functions:: createCipher(vector<vector<Cipher_elg>* >* C, vector<long> num)
 
 
 //Creates a matrix of random numbers
-vector<vector<ZZ>* >* Functions::randomEl(vector<long> num){
-	long m = num[1];
-	long n = num[2];
+vector<vector<ZZ>* >* Functions::randomEl(map<string, long> num){
+	long m = num["ciphertext_matrix_rows"];
+	long n = num["ciphertext_matrix_columns"];
 	vector<vector<ZZ>* >* R = new vector<vector<ZZ>* >(m);
 	vector<ZZ>* r = 0;
 	ZZ ran,ord;
@@ -329,9 +321,9 @@ vector<vector<ZZ>* >* Functions::randomEl(vector<long> num){
 	return R;
 }
 
-void Functions::randomEl(vector<vector<ZZ>*>* R, vector<long> num){
-	long m = num[1];
-	long n = num[2];
+void Functions::randomEl(vector<vector<ZZ>*>* R, map<string, long> num){
+	long m = num["ciphertext_matrix_rows"];
+	long n = num["ciphertext_matrix_columns"];
 	vector<ZZ>* r = 0;
 	ZZ ran,ord;
 	long i,j;
@@ -355,10 +347,13 @@ void Functions::randomEl(vector<vector<ZZ>*>* R, vector<long> num){
 }
 
 //reencrypts the ciphertexts e using the permutation pi and the random elements R
-vector<vector<Cipher_elg>* >*  Functions::reencryptCipher( vector<vector<Cipher_elg>* >* e, vector<vector<vector<long>* >* >* pi, vector<vector<ZZ>*>* R, vector<long> num){
-	long n,m;
-	m = num[1];
-	n = num[2];
+vector<vector<Cipher_elg>* >*  Functions::reencryptCipher(
+					vector<vector<Cipher_elg>* >* e, 
+					vector<vector<vector<long>* >* >* pi, 
+					vector<vector<ZZ>*>* R, 
+					map<string, long> num) {
+	long m = num["ciphertext_matrix_rows"];
+	long n = num["ciphertext_matrix_columns"];
 	vector<vector<Cipher_elg>* >* C= new vector<vector<Cipher_elg>* >(m);
 	vector<Cipher_elg>* r =0;
 	Cipher_elg temp;
@@ -379,10 +374,13 @@ vector<vector<Cipher_elg>* >*  Functions::reencryptCipher( vector<vector<Cipher_
 }
 
 
-void  Functions::reencryptCipher( vector<vector<Cipher_elg>* >* C, vector<vector<Cipher_elg>* >* e, vector<vector<vector<long>* >* >* pi,vector<vector<ZZ>*>* R, vector<long> num){
-	long n,m;
-	m = num[1];
-	n = num[2];
+void Functions::reencryptCipher(vector<vector<Cipher_elg>* >* C, 
+				vector<vector<Cipher_elg>* >* e, 
+				vector<vector<vector<long>* >* >* pi,
+				vector<vector<ZZ>*>* R, 
+				map<string, long> num) {
+	long m = num["ciphertext_matrix_rows"];
+	long n = num["ciphertext_matrix_columns"];
 	vector<Cipher_elg>* r =0;
 	Cipher_elg temp;
 	ZZ ran;

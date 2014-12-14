@@ -10,7 +10,8 @@
 #ifndef PROVER_H_
 #define PROVER_H_
 
-#include<vector>
+#include <vector>
+#include <map>
 #include "Cipher_elg.h"
 #include "G_q.h"
 #include "Mod_p.h"
@@ -105,7 +106,9 @@ private:
 public:
 	//Constructors and destructor
 	Prover();
-	Prover(vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R, vector<vector<vector<long>* >* >* pi, vector<long> num, ZZ genq);
+	Prover(vector<vector<Cipher_elg>* >* E, 
+		vector<vector<ZZ>*>* R, vector<vector<vector<long>* >* >* pi, 
+		map<string, long> num, ZZ genq);
 	virtual ~Prover();
 
 
