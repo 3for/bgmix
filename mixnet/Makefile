@@ -66,7 +66,12 @@ FILES = \
 	Prover\
 	Verifier_me\
 	Verifier_toom\
-	Verifier
+	Verifier\
+	KeccakHash\
+	KeccakSponge\
+	KeccakF-1600-reference\
+	SnP-FBWL-default\
+	displayIntermediateValues
 
 
 
@@ -79,6 +84,14 @@ $(OBJDIR)/%.o:%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 	@echo $(RD)"    creating dependencies for $<"$(NC)
 	$(CXX) $(CXXFLAGS) -MM -MT $(OBJDIR)/$*.o $<  >$(OBJDIR)/$*.d
+
+$(OBJDIR)/%.o:%.c
+	@echo $(RD)"    compiling $<"$(NC)
+	$(CC) $(CFLAGS) -c $< -o $@
+	@echo $(RD)"    creating dependencies for $<"$(NC)
+	$(CC) $(CFLAGS) -MM -MT $(OBJDIR)/$*.o $<  >$(OBJDIR)/$*.d
+
+
 
 # all
 ## make all  - creates software

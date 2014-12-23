@@ -17,6 +17,10 @@
 #include <NTL/ZZ.h>
 NTL_CLIENT
 
+/* For SHA3-256 hash function */
+extern "C" {
+#include "KeccakHash.h"
+}
 
 class func_ver {
 public:
@@ -52,6 +56,10 @@ public:
 	static void fill_vector(vector<ZZ>* t);
 	static void fill_x8(vector<ZZ>* chal_x8, vector<vector<long>* >* basis_chal_x8, vector<ZZ>* mul_chal_x8, long omega);
 	static void fill_e(vector<ZZ>* e, vector<vector<long>* >* basis_e, vector<ZZ>* mul_e, long omega);
+
+        static ZZ hash_keccak_SHA3_256(vector<Mod_p> *c_A);
+	static int ReadHexIntoBS(string szz, BitSequence *A, int Length);
+	static void printBstr(BitSequence *Squeezed, int Length, const string prologue, string &hashString);
 };
 
 #endif /* FUNC_VER_H_ */
