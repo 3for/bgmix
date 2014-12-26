@@ -21,6 +21,14 @@
 #include <NTL/ZZ.h>
 NTL_CLIENT
 
+/* For SHA3-256 hash function */
+extern "C" {
+#include "KeccakHash.h"
+}
+#include <sstream>
+#include <string>
+#include <iomanip>
+
 extern G_q G;
 extern G_q H;
 extern Pedersen Ped;
@@ -927,4 +935,109 @@ void func_pro::calculate_r_Dl_bar(vector<ZZ>* r_C, vector<ZZ>* chal, ZZ &r_Dl_ba
 	ofstream ost;
 	ost.open(name.c_str(),ios::app);
 	ost<<"r_Dl_bar"<<r_Dl_bar<<endl;*/
+}
+
+// Hash vector of ZZ commitments using SHA3-256 (Keccak).
+// pre: 1. cast each element to unsigned long,
+//      2. append it to a string stream in hex format
+//      3. cast the stream to an appropariate structure (BitSequence).
+ZZ func_pro::hash_keccak_SHA3_256(vector<Mod_p> *c_A) {
+        Keccak_HashInstance hashInstance;
+        unsigned long zz_to_ulong = 0;
+        BitSequence Squeezed[4096/8]; // Keccak output hash will go here.
+        stringstream stringstreamZZ;
+        string hashString;         // Adapted hash to feed the ZZ constructor.
+        int c_A_copy_length;
+        vector<Mod_p>::iterator i;
+        for (i = c_A->begin(); i < c_A->end(); i++) {
+                //cout << "Element of vector at position " << j << " is " 
+                //<< i->get_val() << endl;
+
+                // Convert ZZ to unsigned long for efficiency.
+                conv(zz_to_ulong, i->get_val());
+                //cout << "unsigned long is " << zz_to_long << endl;
+
+                // Append to string stream in hex format.
+                stringstreamZZ << hex << zz_to_ulong;
+
+                //cout << "unsigned long in hex is " << stringstreamZZ.str() 
+                //<< endl;
+        }
+        cout << "StringstreamZZ hex is " << stringstreamZZ.str() << endl;
+
+        c_A_copy_length = stringstreamZZ.str().length() + 1;  // Terminal char.
+        BitSequence c_A_copy[c_A_copy_length];
+
+        // Adapt string stream to the required hash input structure.
+        ReadHexIntoBS(stringstreamZZ.str(), c_A_copy, c_A_copy_length);
+
+        // Keccak hashing interface.
+        Keccak_HashInitialize_SHA3_256(&hashInstance); // Init Keccak
+        Keccak_HashUpdate(&hashInstance, c_A_copy, c_A_copy_length);
+        Keccak_HashFinal(&hashInstance, Squeezed); // Keccak creates hash.
+
+        // Fit Keccak output to string.
+        printBstr(Squeezed, 256, "Squeezed hash is: ", hashString);
+
+        // Create ZZ (chal_x2) from string.
+        ZZ hash_of_c_A(INIT_VAL, hashString.c_str());
+        cout << "ZZ hash instance is " << hash_of_c_A << endl;
+        return hash_of_c_A;
+}
+
+// Input hex string containing the commitment into BitSequence structure 
+// for hashing.
+// Heavily based from KeccakCodePackage/Tests/genKAT.c:ReadHex().
+int func_pro::ReadHexIntoBS(string szz, BitSequence *A, int Length) {
+        int i, ch, started;
+        BitSequence ich = '\0';
+        if ( Length == 0 ) {
+                A[0] = 0x00;
+                return 1;
+        }
+        memset(A, 0x00, Length);
+        started = 0;
+        for (unsigned i = 0; i < szz.length(); i++) {
+                ch = szz.at(i);
+                if ( !isxdigit(ch) ) {
+                        if ( !started ) {
+                                if (ch == '\n') break;
+                                else continue;
+                        } else break;
+                }
+                started = 1;
+                if ((ch >= '0') && (ch <= '9'))
+                        ich = ch - '0';
+                else if ((ch >= 'A') && (ch <= 'F'))
+                        ich = ch - 'A' + 10;
+                else if ((ch >= 'a') && (ch <= 'f'))
+                        ich = ch - 'a' + 10;
+                for (i = 0; i < Length-1; i++)
+                        A[i] = (A[i] << 4) | (A[i+1] >> 4);
+                A[Length - 1] = (A[Length - 1] << 4) | ich;
+        }
+        return 1;
+}
+
+// Print hash in BitSequence format and input it to string in decimal form.
+// Heavily based from KeccakCodePackage/Tests/genKAT.c:fprintBstr().
+void func_pro::printBstr(BitSequence *A, int L, const string prologue, string &hashString) {
+        int i;
+        stringstream szz;
+        cout << prologue;
+        for (i = 0; i < L; i++) {
+                cout << setfill('0');
+                cout << hex << setw(2) << (int)A[i];
+                szz << setfill('0');
+
+                // hex to decimal; not sound, but still a computation.
+                szz << dec << setw(2) << (int)A[i];
+        }
+        if (L == 0) {
+                cout << "00";
+                szz << "00";
+        }
+        string interim(szz.str());
+        hashString.replace(0, interim.length(), interim);
+        cout << endl;
 }

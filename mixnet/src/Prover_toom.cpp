@@ -170,6 +170,7 @@ Prover_toom::~Prover_toom() {
 
 //round_1 picks random elements and commits to the rows of A
 string Prover_toom::round_1(){
+	ZZ hash_A_c_A;
 	long i;
 	string name;
 	time_t rawtime;
@@ -179,6 +180,12 @@ string Prover_toom::round_1(){
 	name = name + ctime(&rawtime);
 	//calculates commitments to rows of A
 	Functions::commit_op(A,r_A,c_A);
+
+        /* instead of the interactive version:
+         * chal_x2 = RandomBnd(ord);
+         * hash the A and c_A matrices to get a random value.
+         */
+        hash_A_c_A = func_pro::hash_keccak_SHA3_256(c_A);
 
 	ofstream ost(name.c_str());
 	for (i=0; i<m; i++){

@@ -119,12 +119,6 @@ string Verifier_toom::round_2(string in_name){
 		ist >> c_A->at(i);
 	}
 	
-	/* instead of the interactive version:
-	 * chal_x2 = RandomBnd(ord);
-         * hash the c_A matrix to get a random value.
-	 */
-	chal_x2 = func_ver::hash_keccak_SHA3_256(c_A);
-
 	name = "round_2 ";
 	name = name + ctime(&rawtime);
 	ofstream ost(name.c_str());
