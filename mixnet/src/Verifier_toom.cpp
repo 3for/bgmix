@@ -108,6 +108,7 @@ Verifier_toom::~Verifier_toom() {
 
 string Verifier_toom::round_2(string in_name){
 	long i;
+	ZZ hash_A_c_A;
 	string name;
 	ZZ ord=H.get_ord();
 	time_t rawtime;
@@ -118,10 +119,16 @@ string Verifier_toom::round_2(string in_name){
 	for (i = 0; i<m; i++){
 		ist >> c_A->at(i);
 	}
+	ist >> hash_A_c_A;
+	chal_x2 = hash_A_c_A;
+	// cout << "Verifier - round 2: ZZ hash instance (chal_x2) is " 
+	// << hash_A_c_A << endl;
 	
 	name = "round_2 ";
 	name = name + ctime(&rawtime);
 	ofstream ost(name.c_str());
+
+	// Non-interactive: send hash instead of random challenge.
 	ost << chal_x2;
 
 	return name;

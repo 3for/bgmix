@@ -186,11 +186,14 @@ string Prover_toom::round_1(){
          * hash the A and c_A matrices to get a random value.
          */
         hash_A_c_A = func_pro::hash_keccak_SHA3_256(A, c_A);
+	// cout << "Prover - round 1: ZZ hash instance (chal_x2) is " 
+	// << hash_A_c_A << endl;
 
 	ofstream ost(name.c_str());
 	for (i=0; i<m; i++){
 		ost << c_A->at(i)<< " ";
 	}
+	ost << hash_A_c_A;
 	return name;
 }
 

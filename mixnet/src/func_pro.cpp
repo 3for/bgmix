@@ -984,7 +984,7 @@ ZZ func_pro::hash_keccak_SHA3_256(vector<vector<ZZ>* >* A, vector<Mod_p> *c_A) {
                 //cout << "unsigned long in hex is " << stringstreamZZ.str() 
                 //<< endl;
         }
-        cout << "StringstreamZZ hex is " << stringstreamZZ.str() << endl;
+        // cout << "StringstreamZZ hex is " << stringstreamZZ.str() << endl;
 
         c_A_copy_length = stringstreamZZ.str().length() + 1;  // Terminal char.
         BitSequence c_A_copy[c_A_copy_length];
@@ -1001,9 +1001,9 @@ ZZ func_pro::hash_keccak_SHA3_256(vector<vector<ZZ>* >* A, vector<Mod_p> *c_A) {
         printBstr(Squeezed, 256, "Squeezed hash is: ", hashString);
 
         // Create ZZ (chal_x2) from string.
-        ZZ hash_of_c_A(INIT_VAL, hashString.c_str());
-        cout << "ZZ hash instance is " << hash_of_c_A << endl;
-        return hash_of_c_A;
+        ZZ hash_A_c_A(INIT_VAL, hashString.c_str());
+        // cout << "ZZ hash instance is " << hash_of_c_A << endl;
+        return hash_A_c_A;
 }
 
 // Input hex string containing the commitment into BitSequence structure 
@@ -1047,15 +1047,15 @@ void func_pro::printBstr(BitSequence *A, int L, const string prologue, string &h
         stringstream szz;
         cout << prologue;
         for (i = 0; i < L; i++) {
-                cout << setfill('0');
-                cout << hex << setw(2) << (int)A[i];
+                // cout << setfill('0');
+                // cout << hex << setw(2) << (int)A[i];
                 szz << setfill('0');
 
                 // hex to decimal; not sound, but still a computation.
                 szz << dec << setw(2) << (int)A[i];
         }
         if (L == 0) {
-                cout << "00";
+                // cout << "00";
                 szz << "00";
         }
         string interim(szz.str());
