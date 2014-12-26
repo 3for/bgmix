@@ -185,7 +185,7 @@ string Prover_toom::round_1(){
          * chal_x2 = RandomBnd(ord);
          * hash the A and c_A matrices to get a random value.
          */
-        hash_A_c_A = func_pro::hash_keccak_SHA3_256(c_A);
+        hash_A_c_A = func_pro::hash_keccak_SHA3_256(A, c_A);
 
 	ofstream ost(name.c_str());
 	for (i=0; i<m; i++){

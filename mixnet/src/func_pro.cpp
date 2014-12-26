@@ -937,21 +937,42 @@ void func_pro::calculate_r_Dl_bar(vector<ZZ>* r_C, vector<ZZ>* chal, ZZ &r_Dl_ba
 	ost<<"r_Dl_bar"<<r_Dl_bar<<endl;*/
 }
 
-// Hash vector of ZZ commitments using SHA3-256 (Keccak).
+// Hash matrix of ZZ numbers and vector of ZZ commitments using 
+// SHA3-256 (Keccak).
 // pre: 1. cast each element to unsigned long,
 //      2. append it to a string stream in hex format
 //      3. cast the stream to an appropariate structure (BitSequence).
-ZZ func_pro::hash_keccak_SHA3_256(vector<Mod_p> *c_A) {
+ZZ func_pro::hash_keccak_SHA3_256(vector<vector<ZZ>* >* A, vector<Mod_p> *c_A) {
         Keccak_HashInstance hashInstance;
         unsigned long zz_to_ulong = 0;
         BitSequence Squeezed[4096/8]; // Keccak output hash will go here.
         stringstream stringstreamZZ;
         string hashString;         // Adapted hash to feed the ZZ constructor.
         int c_A_copy_length;
+        vector<vector<ZZ>* >::iterator j;
+        vector<ZZ>::iterator k;
         vector<Mod_p>::iterator i;
+        for (j = A->begin(); j < A->end(); j++) {
+        	for (k = (*j)->begin(); k < (*j)->end(); k++) {
+                	// cout << "Element of vector at position " 
+			// << k - (*j)->begin() << " is " << *k << endl;
+
+			// Convert ZZ to unsigned long for efficiency.
+			conv(zz_to_ulong, *k);
+			//cout << "unsigned long is " << zz_to_long << endl;
+
+			// Append to string stream in hex format.
+			stringstreamZZ << hex << zz_to_ulong;
+
+			// cout << "unsigned long in hex is " 
+			// << stringstreamZZ.str() 
+			// << endl;
+		}
+	}
+
         for (i = c_A->begin(); i < c_A->end(); i++) {
-                //cout << "Element of vector at position " << j << " is " 
-                //<< i->get_val() << endl;
+                //cout << "Element of vector at position " << i - c_A->begin() 
+		// << " is " << i->get_val() << endl;
 
                 // Convert ZZ to unsigned long for efficiency.
                 conv(zz_to_ulong, i->get_val());
