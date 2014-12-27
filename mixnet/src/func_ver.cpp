@@ -28,6 +28,9 @@ extern "C" {
 #include <string>
 #include <iomanip>
 
+#define KAT_HASH_ERROR 4
+
+
 extern G_q G;
 extern G_q H;
 extern Pedersen Ped;
@@ -685,19 +688,129 @@ void func_ver::fill_x8(vector<ZZ>* chal_x8, vector<vector<long>* >* basis_chal_x
 	}
 }
 
-// Hash vector of ZZ commitments using SHA3-256 (Keccak).
-// pre: 1. cast each element to unsigned long,
-//      2. append it to a string stream in hex format
+// Hash challenge and commitments to B.
+// Process:
+//	1. Cast each element of c_B to unsigned long,
+//      2. append all to a string stream in hex format
 //      3. cast the stream to an appropariate structure (BitSequence).
-ZZ func_ver::hash_keccak_SHA3_256(vector<Mod_p> *c_A) {
-	Keccak_HashInstance hashInstance;
+ZZ func_ver::hash_chal_x2_c_B(ZZ chal_x2, vector<Mod_p>* c_B, string partition) {
         unsigned long zz_to_ulong = 0;
-	BitSequence Squeezed[4096/8]; // Keccak output hash will go here.
 	stringstream stringstreamZZ;
-	string hashString;	   // Adapted hash to feed the ZZ constructor.
-	int c_A_copy_length;
+	
+	conv(zz_to_ulong, chal_x2);
+	stringstreamZZ << hex << zz_to_ulong;
+
+	stringstreamZZ << stringify_commitment(c_B, partition);
+
+	cout << "StringstreamZZ hex of chal_x2 and commitments of B is " 
+	<< stringstreamZZ.str() << endl;
+
+	return hash_keccak_SHA3_256(stringstreamZZ.str());
+}
+
+// Hash vector of ZZ commitments using SHA3-256 (Keccak).
+// Hash input: 
+//	1. c, C: ciphertexts
+//	2. n, omega, omega_LL, omega_sw, G (global): Pedersen parameters.
+//	3. m, N, H (global): ElGammal parameters.
+// Process:
+//	1. Cast each element of c_A to unsigned long,
+//      2. append all to a string stream in hex format
+//      3. cast the stream to an appropariate structure (BitSequence).
+ZZ func_ver::hash_cipher_Pedersen_ElGammal(vector<vector<Cipher_elg>* >* c,
+				  	   vector<vector<Cipher_elg>* >* C,
+				  	   long n, long omega, long omega_LL,
+				  	   long omega_sw, long m, long N,
+				  	   vector<Mod_p> *c_A) {
+        unsigned long zz_to_ulong = 0;
+	stringstream stringstreamZZ;
 	vector<Mod_p>::iterator i;
-	for (i = c_A->begin(); i < c_A->end(); i++) {
+	
+	stringstreamZZ << stringify_ciphertext(c); // Ciphertexts
+	stringstreamZZ << stringify_ciphertext(C);
+	//cout << "StringstreamZZ hex of initial and reencrypted ciphertexts is " 
+	//<< stringstreamZZ.str() << endl;
+
+	stringstreamZZ << hex << n; // Parameters of Pedersen
+	stringstreamZZ << hex << omega; 
+	stringstreamZZ << hex << omega_LL; 
+	stringstreamZZ << hex << omega_sw; 
+	conv(zz_to_ulong, G.get_gen().get_val());
+	stringstreamZZ << hex << zz_to_ulong;
+	conv(zz_to_ulong, G.get_mod());
+	stringstreamZZ << hex << zz_to_ulong;
+	conv(zz_to_ulong, G.get_ord());
+	stringstreamZZ << hex << zz_to_ulong;
+	stringstreamZZ << hex << m; // Parameters of ElGammal
+	stringstreamZZ << hex << N; 
+	conv(zz_to_ulong, H.get_gen().get_val());
+	stringstreamZZ << hex << zz_to_ulong;
+	conv(zz_to_ulong, H.get_mod());
+	stringstreamZZ << hex << zz_to_ulong;
+	conv(zz_to_ulong, H.get_ord());
+	stringstreamZZ << hex << zz_to_ulong;
+	//cout << "StringstreamZZ hex of Pedersen and ElGammal parameters is " 
+	//<< stringstreamZZ.str() << endl;
+	
+	stringstreamZZ << stringify_commitment(c_A, "all");
+
+	//cout << "StringstreamZZ hex for chal_x2 is " 
+	//<< stringstreamZZ.str() << endl;
+	return hash_keccak_SHA3_256(stringstreamZZ.str());
+}
+
+ZZ func_ver::hash_keccak_SHA3_256(string input) {
+	Keccak_HashInstance hashInstance;
+	int c_A_copy_length = input.length() + 1;  // Terminal char.
+	BitSequence c_A_copy[c_A_copy_length];
+	unsigned int squeezedOutputLength = 0; // For cross-matching with Keccak.
+	unsigned int SqueezingOutputLength = 4096;
+	unsigned int hashbitlen = 256;
+	BitSequence Squeezed[SqueezingOutputLength/8]; // Keccak output hash.
+	string hashString;	   // Adapted hash to feed the ZZ constructor.
+
+	if ((squeezedOutputLength > SqueezingOutputLength) || 
+		(hashbitlen > SqueezingOutputLength)) {
+        	cout << "Requested output length too long." << endl;
+        	return ZZ(INIT_VAL, KAT_HASH_ERROR);
+    	}
+
+	// Adapt string stream to the required hash input structure.
+	ReadHexIntoBS(input, c_A_copy, c_A_copy_length);
+
+	// Keccak hashing interface.
+	Keccak_HashInitialize_SHA3_256(&hashInstance); // Init Keccak
+	Keccak_HashUpdate(&hashInstance, c_A_copy, c_A_copy_length);
+	Keccak_HashFinal(&hashInstance, Squeezed); // Keccak creates hash.
+
+	// Fit Keccak output to string. 
+	printBstr(Squeezed, 17, "Squeezed hash is: ", hashString);
+        // 17*2 = 34 in hex ~ 45 in decimal;
+	// [45-48] = length of ZZ numbers selected randomly in interactive mode. 
+
+	// Create ZZ (chal_x2) from string.
+	ZZ hash_of_c_A(INIT_VAL, hashString.c_str());
+	cout << "ZZ hash instance is " << hash_of_c_A << endl;
+	return hash_of_c_A;
+}
+
+string func_ver::stringify_commitment(vector<Mod_p>* com, string partition) {
+	vector<Mod_p>::iterator i, j;
+	stringstream stringstreamZZ;
+	unsigned long zz_to_ulong;
+
+	if (partition == "all") {
+		i = com->begin();
+		j = com->end();
+	} else if (partition == "first-half") {
+		i = com->begin();
+		j = com->begin() + com->size()/2;
+	} else if (partition == "other-half") {
+		i = com->begin() + com->size()/2;
+		j = com->end();
+	}	
+
+	for (; i < j; i++) { // commitments of A
 		//cout << "Element of vector at position " << j << " is " 
 		//<< i->get_val() << endl;
 
@@ -711,26 +824,26 @@ ZZ func_ver::hash_keccak_SHA3_256(vector<Mod_p> *c_A) {
 		//cout << "unsigned long in hex is " << stringstreamZZ.str() 
 		//<< endl;
 	}
-	cout << "StringstreamZZ hex is " << stringstreamZZ.str() << endl;
+	return stringstreamZZ.str();
+}
 
-	c_A_copy_length = stringstreamZZ.str().length() + 1;  // Terminal char.
-	BitSequence c_A_copy[c_A_copy_length];
-
-	// Adapt string stream to the required hash input structure.
-	ReadHexIntoBS(stringstreamZZ.str(), c_A_copy, c_A_copy_length);
-
-	// Keccak hashing interface.
-	Keccak_HashInitialize_SHA3_256(&hashInstance); // Init Keccak
-	Keccak_HashUpdate(&hashInstance, c_A_copy, c_A_copy_length);
-	Keccak_HashFinal(&hashInstance, Squeezed); // Keccak creates hash.
-
-	// Fit Keccak output to string.
-	printBstr(Squeezed, 256, "Squeezed hash is: ", hashString);
-
-	// Create ZZ (chal_x2) from string.
-	ZZ hash_of_c_A(INIT_VAL, hashString.c_str());
-	cout << "ZZ hash instance is " << hash_of_c_A << endl;
-	return hash_of_c_A;
+// Make hex string out of ciphertext.
+string func_ver::stringify_ciphertext(vector<vector<Cipher_elg>* >*c) {
+	stringstream c_hex_ss;
+	vector<vector<Cipher_elg>* >::iterator i;
+	vector<Cipher_elg>::iterator j;
+	unsigned long zz_to_ulong;
+	for (i = c->begin(); i < c->end(); i++) {
+		for (j = (*i)->begin(); j < (*i)->end(); j++) {
+			conv(zz_to_ulong, j->get_u());
+			c_hex_ss << hex << zz_to_ulong; 
+			conv(zz_to_ulong, j->get_v()); 
+			c_hex_ss << hex << zz_to_ulong; 
+			conv(zz_to_ulong, j->get_mod()); 
+			c_hex_ss << hex << zz_to_ulong; 
+		}
+	}
+	return c_hex_ss.str();
 }
 
 // Input hex string containing the commitment into BitSequence structure 

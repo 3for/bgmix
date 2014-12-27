@@ -174,6 +174,8 @@ void func_pro::set_D(vector<vector<ZZ>* >* D, vector<vector<ZZ>* >* A, vector<ve
 /*	ofstream ost;
 	ost.open(name.c_str(),ios::app);
 	ost<<"set vector D = yA_ij +B_ij "<<endl;*/
+
+
 	for (i= 0; i<m; i++){
 		row = new vector<ZZ>(n);
 		for (j = 0; j<n; j++){

@@ -404,7 +404,7 @@ int shuffle_w_toom(vector<vector<Cipher_elg>* >* c,
 	mu_h = 2*mu-1;
 	m_r = num["ciphertext_matrix_rows"]/mu;
 	P = new Prover_toom(C,R,pi,num, gen);
-	V = new Verifier_toom(num);
+	V = new Verifier_toom(c, C, num);
 
 
 	time_p=0;

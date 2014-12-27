@@ -36,10 +36,15 @@ Verifier_toom::Verifier_toom() {
 }
 
 
-Verifier_toom::Verifier_toom(map<string, long> num) {
+Verifier_toom::Verifier_toom(vector<vector<Cipher_elg>* >* cc,
+				vector<vector<Cipher_elg>* >* CC,
+				map<string, long> num) {
+	c = cc;
+	C = CC;
 	// sets the values of the matrix according to the input
 	m = num["ciphertext_matrix_rows"]; //number of rows
 	n = num["ciphertext_matrix_columns"]; //number of columns
+	N = num["number_of_ciphertexts"]; //added for non-interactive
 	omega = num["window_size_multi_exponentiation_brickels"]; //windowsize for multi-expo-technique
 	omega_sw = num["window_size_multi_exponentiation"]; //windowsize for multi-expo-technique sliding window and LL
 	omega_LL = num["window_size_multi_exponentiation_lim_lee"]; //windowsize for multi-expo-technique of LL
@@ -123,7 +128,12 @@ string Verifier_toom::round_2(string in_name){
 	 * chal_x2 = RandomBnd(ord);
          * hash the c_A matrix to get a random value.
 	 */
-	chal_x2 = func_ver::hash_keccak_SHA3_256(c_A);
+	chal_x2 = func_ver::hash_cipher_Pedersen_ElGammal(
+						 c, C, // ciphertexts
+						 n, // Pedersen
+						 omega, omega_LL, omega_sw,
+						 m, N, // ElGammal
+						 c_A); // commitment of A
 
 	name = "round_2 ";
 	name = name + ctime(&rawtime);
@@ -150,8 +160,13 @@ string Verifier_toom::round_4(string in_name){
 	name = "round_4 ";
 	name = name + ctime(&rawtime);
 
-	chal_z4 = RandomBnd(ord);
-	chal_y4 = RandomBnd(ord);
+	// non-interactive
+	bool reverse = false;
+	chal_z4 = func_ver::hash_chal_x2_c_B(chal_x2, c_B, "first-half");
+		
+	// non-interactive
+	reverse = true;
+	chal_y4 = func_ver::hash_chal_x2_c_B(chal_x2, c_B, "other-half");
 
 	ofstream ost(name.c_str());
 	ost<< chal_z4<<"\n";
