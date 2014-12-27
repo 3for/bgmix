@@ -704,15 +704,15 @@ void func_ver::hash_fill_x8(ZZ chal_x6, vector<Mod_p>* c_a,
 	conv(zz_to_ulong, chal_x6);
 	stringstreamZZ << hex << zz_to_ulong;
 
-	stringstreamZZ << stringify_commitment(c_a, "all");
+	stringstreamZZ << stringify_commitment(c_a);
 
 	//Avoid the need for yet another string trasnformation function.
 	vector<vector<Cipher_elg>* > container; 
 	container.push_back(E);
 	stringstreamZZ << stringify_ciphertext(&container);
 
-	cout << "StringstreamZZ hex of chal_x8 and commitments of c_a "
-	<< "and ciphertext E is " << stringstreamZZ.str() << endl;
+	//cout << "StringstreamZZ hex of chal_x8 and commitments of c_a "
+	//<< "and ciphertext E is " << stringstreamZZ.str() << endl;
 
 	l= chal_x8->size();
 	chal = hash_keccak_SHA3_256(stringstreamZZ.str());
@@ -731,9 +731,8 @@ void func_ver::hash_fill_x8(ZZ chal_x6, vector<Mod_p>* c_a,
 	}
 }
 
-void func_ver::hash_fill_vector(ZZ chal_in, vector<Mod_p>* c_Dh, 
+void func_ver::hash_fill_vector(ZZ chal_in, vector<Mod_p>* com, 
                                 vector<Cipher_elg>* C_c, 
-                                vector<Mod_p>* c_a_c, 
                                 vector<ZZ>* chal) {
 	long i,l;
 	ZZ temp;
@@ -745,16 +744,16 @@ void func_ver::hash_fill_vector(ZZ chal_in, vector<Mod_p>* c_Dh,
 	conv(zz_to_ulong, chal_in);
 	stringstreamZZ << hex << zz_to_ulong;
 
-	stringstreamZZ << stringify_commitment(c_Dh, "all");
-	stringstreamZZ << stringify_commitment(c_a_c, "all");
+	stringstreamZZ << stringify_commitment(com);
 
 	//Avoid the need for yet another string trasnformation function.
 	vector<vector<Cipher_elg>* > container; 
 	container.push_back(C_c);
 	stringstreamZZ << stringify_ciphertext(&container);
 
-	cout << "StringstreamZZ hex of chal and commitments of c_Dh, c_a_c "
-	<< "and ciphertext C_c is " << stringstreamZZ.str() << endl;
+	//cout << "StringstreamZZ hex of chal_z4 or chal_y4 and commitments " 
+	//<< "of c_Dh or c_a_c " << "and ciphertext C_c is " 
+	//<< stringstreamZZ.str() << endl;
 
 	temp = hash_keccak_SHA3_256(stringstreamZZ.str());
 
@@ -770,17 +769,20 @@ void func_ver::hash_fill_vector(ZZ chal_in, vector<Mod_p>* c_Dh,
 //	1. Cast each element of c_B to unsigned long,
 //      2. append all to a string stream in hex format
 //      3. cast the stream to an appropariate structure (BitSequence).
-ZZ func_ver::hash_chal_x2_c_B(ZZ chal_x2, vector<Mod_p>* c_B, string partition) {
+ZZ func_ver::hash_chal_x2_c_B(ZZ chal_x2, vector<Mod_p>* c_B, 
+				vector<vector<Cipher_elg>* >* ct) {
         unsigned long zz_to_ulong = 0;
 	stringstream stringstreamZZ;
-	
+
+	stringstreamZZ << stringify_ciphertext(ct);	
+
 	conv(zz_to_ulong, chal_x2);
 	stringstreamZZ << hex << zz_to_ulong;
+	
+	stringstreamZZ << stringify_commitment(c_B);
 
-	stringstreamZZ << stringify_commitment(c_B, partition);
-
-	cout << "StringstreamZZ hex of chal_x2 and commitments of B is " 
-	<< stringstreamZZ.str() << endl;
+	//cout << "StringstreamZZ hex of chal_x2 and commitments of B is " 
+	//<< stringstreamZZ.str() << endl;
 
 	return hash_keccak_SHA3_256(stringstreamZZ.str());
 }
@@ -828,7 +830,7 @@ ZZ func_ver::hash_cipher_Pedersen_ElGammal(vector<vector<Cipher_elg>* >* c,
 	//cout << "StringstreamZZ hex of Pedersen and ElGammal parameters is " 
 	//<< stringstreamZZ.str() << endl;
 	
-	stringstreamZZ << stringify_commitment(c_A, "all");
+	stringstreamZZ << stringify_commitment(c_A);
 
 	//cout << "StringstreamZZ hex for chal_x2 is " 
 	//<< stringstreamZZ.str() << endl;
@@ -860,33 +862,22 @@ ZZ func_ver::hash_keccak_SHA3_256(string input) {
 	Keccak_HashFinal(&hashInstance, Squeezed); // Keccak creates hash.
 
 	// Fit Keccak output to string. 
-	printBstr(Squeezed, 17, "Squeezed hash is: ", hashString);
+	printBstr(Squeezed, 24, "Squeezed hash is: ", hashString);
         // 17*2 = 34 in hex ~ 45 in decimal;
 	// [45-48] = length of ZZ numbers selected randomly in interactive mode. 
 
 	// Create ZZ (chal_x2) from string.
 	ZZ hash_of_c_A(INIT_VAL, hashString.c_str());
-	cout << "ZZ hash instance is " << hash_of_c_A << endl;
+	//cout << "ZZ hash instance is " << hash_of_c_A << endl;
 	return hash_of_c_A;
 }
 
-string func_ver::stringify_commitment(vector<Mod_p>* com, string partition) {
+string func_ver::stringify_commitment(vector<Mod_p>* com) {
 	vector<Mod_p>::iterator i, j;
 	stringstream stringstreamZZ;
 	unsigned long zz_to_ulong;
 
-	if (partition == "all") {
-		i = com->begin();
-		j = com->end();
-	} else if (partition == "first-half") {
-		i = com->begin();
-		j = com->begin() + com->size()/2;
-	} else if (partition == "other-half") {
-		i = com->begin() + com->size()/2;
-		j = com->end();
-	}	
-
-	for (; i < j; i++) { // commitments of A
+	for (i = com->begin(); i < com->end(); i++) { // commitments of A
 		//cout << "Element of vector at position " << j << " is " 
 		//<< i->get_val() << endl;
 
@@ -961,14 +952,15 @@ int func_ver::ReadHexIntoBS(string szz, BitSequence *A, int Length) {
 void func_ver::printBstr(BitSequence *A, int L, const string prologue, string &hashString) {
 	int i;
 	stringstream szz;
-	cout << prologue;
+	//cout << prologue;
 	for (i = 0; i < L; i++) {
-		cout << setfill('0');
-		cout << hex << setw(2) << (int)A[i];
-		szz << setfill('0');
+		//cout << setfill('0');
+		//cout << hex << setw(2) << (int)A[i];
 
+		if (szz.str().length() + 3 > L * 2) break;  //at most 48 digits.
+		szz << setfill('0');
 		// hex to decimal; not sound, but still a computation.
-		szz << dec << setw(2) << (int)A[i];  
+		szz << dec << setw(2) << (int)A[i];
 	}
 	if (L == 0) {
 		cout << "00";

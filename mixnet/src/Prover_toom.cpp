@@ -279,10 +279,6 @@ string Prover_toom::round_5(string in_name ){
 	ist>>chal_z4;
 	ist >> chal_y4;
 
-
-cout << "Read z4 " << chal_z4 << endl;
-cout << "Read y4 " << chal_y4 << endl;
-
 	round_5a();
 	round_5b();
 	//Set name of the output file and open stream

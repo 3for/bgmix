@@ -134,6 +134,9 @@ string Verifier_toom::round_2(string in_name){
 						 omega, omega_LL, omega_sw,
 						 m, N, // ElGammal
 						 c_A); // commitment of A
+	cout << "chal_x2 hash: " << chal_x2 << endl;
+	cout << "hash input: c, C, n, omega, omega_LL, omega_sw, m, N, c_A." << endl;
+
 
 	name = "round_2 ";
 	name = name + ctime(&rawtime);
@@ -161,12 +164,14 @@ string Verifier_toom::round_4(string in_name){
 	name = name + ctime(&rawtime);
 
 	// non-interactive
-	bool reverse = false;
-	chal_z4 = func_ver::hash_chal_x2_c_B(chal_x2, c_B, "first-half");
-		
+	chal_z4 = func_ver::hash_chal_x2_c_B(chal_x2, c_B, c);
+	cout << "chal_z4 hash: " << chal_z4 << endl;
+	cout << "hash input: chal_x2, c_B, c." << endl;
+
 	// non-interactive
-	reverse = true;
-	chal_y4 = func_ver::hash_chal_x2_c_B(chal_x2, c_B, "other-half");
+	chal_y4 = func_ver::hash_chal_x2_c_B(chal_x2, c_B, C);
+	cout << "chal_y4 hash: " << chal_y4 << endl;
+	cout << "hash input: chal_x2, c_B, C." << endl;
 
 	ofstream ost(name.c_str());
 	ost<< chal_z4<<"\n";
@@ -197,10 +202,14 @@ string Verifier_toom::round_6(string in_name){
 	}
 
 	//sets the vector t to the values temp, temp^2,...
-	func_ver::hash_fill_vector(chal_z4, c_Dh, C_c, c_a_c, chal_x6);
+	func_ver::hash_fill_vector(chal_z4, c_Dh, C_c, chal_x6);
+	cout << "chal_x6 hash: " << chal_x6->at(0) << endl;
+	cout << "hash input: chal_z4, c_Dh, C_c." << endl;
 
 	//sets the vector t to the values temp, temp^2,...
-	func_ver::hash_fill_vector(chal_y4, c_Dh, C_c, c_a_c, chal_y6);
+	func_ver::hash_fill_vector(chal_y4, c_a_c, C_c, chal_y6);
+	cout << "chal_y6 hash: " << chal_y6->at(0) << endl;
+	cout << "hash input: chal_y4, c_a_c, C_c." << endl;
 
 	name = "round_6 ";
 	name = name + ctime(&rawtime);
@@ -350,6 +359,9 @@ string  Verifier_toom::round_8(string in_name){
 
 	func_ver::hash_fill_x8(chal_x6->at(0), c_a, E, chal_x8, 
 				basis_chal_x8, mul_chal_x8, omega);
+	cout << "chal_x8 hash: " << chal_x8->at(0) << endl;
+	cout << "hash input: chal_x6, c_a, E." << endl;
+
 	l= chal_x8->size();
 
 	name = "round_8 ";

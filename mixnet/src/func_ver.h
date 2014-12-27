@@ -62,18 +62,18 @@ public:
 					vector<ZZ>* chal_x8,
 					vector<vector<long>* >* basis_chal_x8, 
 					vector<ZZ>* mul_chal_x8, long omega);
-	static void hash_fill_vector(ZZ chal_in, vector<Mod_p>* c_Dh, 
+	static void hash_fill_vector(ZZ chal_in, vector<Mod_p>* com, 
 					vector<Cipher_elg>* C_c, 
-					vector<Mod_p>* c_a_c, 
 					vector<ZZ>* chal);
-	static ZZ hash_chal_x2_c_B(ZZ chal_x2, vector<Mod_p>* c_B, string partition);
+	static ZZ hash_chal_x2_c_B(ZZ chal_x2, vector<Mod_p>* c_B, 
+						vector<vector<Cipher_elg>* >* ct);
 	static ZZ hash_cipher_Pedersen_ElGammal(vector<vector<Cipher_elg>* >* c,
 					vector<vector<Cipher_elg>* >* C,
 					long n, long omega, long omega_LL,
                                   	long omega_sw, long m, long N,
                                   	vector<Mod_p> *c_A);
 	static ZZ hash_keccak_SHA3_256(string input);
-	static string stringify_commitment(vector<Mod_p>* com, string partition);
+	static string stringify_commitment(vector<Mod_p>* com);
 	static string stringify_ciphertext(vector<vector<Cipher_elg>* >* ct);
 	static int ReadHexIntoBS(string szz, BitSequence *A, int Length);
 	static void printBstr(BitSequence *Squeezed, int Length, 
