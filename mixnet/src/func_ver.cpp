@@ -688,6 +688,49 @@ void func_ver::fill_x8(vector<ZZ>* chal_x8, vector<vector<long>* >* basis_chal_x
 	}
 }
 
+void func_ver::hash_fill_x8(ZZ chal_x6, vector<Mod_p>* c_a,
+                                        vector<Cipher_elg>* E,
+                                        vector<ZZ>* chal_x8,
+                                        vector<vector<long>* >* basis_chal_x8, 
+                                        vector<ZZ>* mul_chal_x8, long omega) {
+	long i, l;
+	ZZ chal;
+	ZZ ord = H.get_ord();
+	long num_b= NumBits(ord);
+
+        unsigned long zz_to_ulong = 0;
+	stringstream stringstreamZZ;
+	
+	conv(zz_to_ulong, chal_x6);
+	stringstreamZZ << hex << zz_to_ulong;
+
+	stringstreamZZ << stringify_commitment(c_a, "all");
+
+	//Avoid the need for yet another string trasnformation function.
+	vector<vector<Cipher_elg>* > container; 
+	container.push_back(E);
+	stringstreamZZ << stringify_ciphertext(&container);
+
+	cout << "StringstreamZZ hex of chal_x8 and commitments of c_a "
+	<< "and ciphertext E is " << stringstreamZZ.str() << endl;
+
+	l= chal_x8->size();
+	chal = hash_keccak_SHA3_256(stringstreamZZ.str());
+
+	chal_x8->at(0)= chal;
+	basis_chal_x8->at(0) = multi_expo::to_basis(to_ZZ(1),num_b, omega);
+	basis_chal_x8->at(1) = multi_expo::to_basis(chal_x8->at(0),num_b, omega);
+
+	mul_chal_x8->at(0) =1;
+	mul_chal_x8->at(1) =chal_x8->at(0);
+
+	for (i = 1; i<l; i++){
+		 MulMod(chal_x8->at(i),chal, chal_x8->at(i-1), ord);
+		 basis_chal_x8->at(i+1) = multi_expo::to_basis(chal_x8->at(i),num_b, omega);
+		 mul_chal_x8->at(i+1) = chal_x8->at(i);
+	}
+}
+
 void func_ver::hash_fill_vector(ZZ chal_in, vector<Mod_p>* c_Dh, 
                                 vector<Cipher_elg>* C_c, 
                                 vector<Mod_p>* c_a_c, 

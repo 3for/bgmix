@@ -57,6 +57,11 @@ public:
 	static void fill_x8(vector<ZZ>* chal_x8, vector<vector<long>* >* basis_chal_x8, vector<ZZ>* mul_chal_x8, long omega);
 	static void fill_e(vector<ZZ>* e, vector<vector<long>* >* basis_e, vector<ZZ>* mul_e, long omega);
 
+	static void hash_fill_x8(ZZ chal_x6, vector<Mod_p>* c_a, 
+					vector<Cipher_elg>* E, 
+					vector<ZZ>* chal_x8,
+					vector<vector<long>* >* basis_chal_x8, 
+					vector<ZZ>* mul_chal_x8, long omega);
 	static void hash_fill_vector(ZZ chal_in, vector<Mod_p>* c_Dh, 
 					vector<Cipher_elg>* C_c, 
 					vector<Mod_p>* c_a_c, 

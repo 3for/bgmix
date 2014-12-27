@@ -348,7 +348,8 @@ string  Verifier_toom::round_8(string in_name){
 		ist>>c_a->at(i);
 	}
 
-	func_ver::fill_x8(chal_x8, basis_chal_x8, mul_chal_x8, omega);
+	func_ver::hash_fill_x8(chal_x6->at(0), c_a, E, chal_x8, 
+				basis_chal_x8, mul_chal_x8, omega);
 	l= chal_x8->size();
 
 	name = "round_8 ";
