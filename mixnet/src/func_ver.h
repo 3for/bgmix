@@ -57,6 +57,10 @@ public:
 	static void fill_x8(vector<ZZ>* chal_x8, vector<vector<long>* >* basis_chal_x8, vector<ZZ>* mul_chal_x8, long omega);
 	static void fill_e(vector<ZZ>* e, vector<vector<long>* >* basis_e, vector<ZZ>* mul_e, long omega);
 
+	static void hash_fill_vector(ZZ chal_in, vector<Mod_p>* c_Dh, 
+					vector<Cipher_elg>* C_c, 
+					vector<Mod_p>* c_a_c, 
+					vector<ZZ>* chal);
 	static ZZ hash_chal_x2_c_B(ZZ chal_x2, vector<Mod_p>* c_B, string partition);
 	static ZZ hash_cipher_Pedersen_ElGammal(vector<vector<Cipher_elg>* >* c,
 					vector<vector<Cipher_elg>* >* C,

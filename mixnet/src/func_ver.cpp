@@ -688,6 +688,40 @@ void func_ver::fill_x8(vector<ZZ>* chal_x8, vector<vector<long>* >* basis_chal_x
 	}
 }
 
+void func_ver::hash_fill_vector(ZZ chal_in, vector<Mod_p>* c_Dh, 
+                                vector<Cipher_elg>* C_c, 
+                                vector<Mod_p>* c_a_c, 
+                                vector<ZZ>* chal) {
+	long i,l;
+	ZZ temp;
+	ZZ ord = H.get_ord();
+
+        unsigned long zz_to_ulong = 0;
+	stringstream stringstreamZZ;
+	
+	conv(zz_to_ulong, chal_in);
+	stringstreamZZ << hex << zz_to_ulong;
+
+	stringstreamZZ << stringify_commitment(c_Dh, "all");
+	stringstreamZZ << stringify_commitment(c_a_c, "all");
+
+	//Avoid the need for yet another string trasnformation function.
+	vector<vector<Cipher_elg>* > container; 
+	container.push_back(C_c);
+	stringstreamZZ << stringify_ciphertext(&container);
+
+	cout << "StringstreamZZ hex of chal and commitments of c_Dh, c_a_c "
+	<< "and ciphertext C_c is " << stringstreamZZ.str() << endl;
+
+	temp = hash_keccak_SHA3_256(stringstreamZZ.str());
+
+	l = chal->size();
+	chal->at(0)=temp;
+	for(i=1; i<l; i++){
+		MulMod(chal->at(i), chal->at(i-1), temp, ord);
+	}
+}
+
 // Hash challenge and commitments to B.
 // Process:
 //	1. Cast each element of c_B to unsigned long,
@@ -724,7 +758,6 @@ ZZ func_ver::hash_cipher_Pedersen_ElGammal(vector<vector<Cipher_elg>* >* c,
 				  	   vector<Mod_p> *c_A) {
         unsigned long zz_to_ulong = 0;
 	stringstream stringstreamZZ;
-	vector<Mod_p>::iterator i;
 	
 	stringstreamZZ << stringify_ciphertext(c); // Ciphertexts
 	stringstreamZZ << stringify_ciphertext(C);

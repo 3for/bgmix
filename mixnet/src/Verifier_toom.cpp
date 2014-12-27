@@ -197,10 +197,10 @@ string Verifier_toom::round_6(string in_name){
 	}
 
 	//sets the vector t to the values temp, temp^2,...
-	func_ver::fill_vector(chal_x6);
+	func_ver::hash_fill_vector(chal_z4, c_Dh, C_c, c_a_c, chal_x6);
 
 	//sets the vector t to the values temp, temp^2,...
-	func_ver::fill_vector(chal_y6);
+	func_ver::hash_fill_vector(chal_y4, c_Dh, C_c, c_a_c, chal_y6);
 
 	name = "round_6 ";
 	name = name + ctime(&rawtime);
