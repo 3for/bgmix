@@ -764,17 +764,33 @@ void func_ver::hash_fill_vector(ZZ chal_in, vector<Mod_p>* com,
 	}
 }
 
-// Hash challenge and commitments to B.
+// Hash chal_x2 and commitments to B.
 // Process:
 //	1. Cast each element of c_B to unsigned long,
 //      2. append all to a string stream in hex format
 //      3. cast the stream to an appropariate structure (BitSequence).
-ZZ func_ver::hash_chal_x2_c_B(ZZ chal_x2, vector<Mod_p>* c_B, 
-				vector<vector<Cipher_elg>* >* ct) {
+ZZ func_ver::hash_chal_z4(ZZ chal_z4) {
         unsigned long zz_to_ulong = 0;
 	stringstream stringstreamZZ;
 
-	stringstreamZZ << stringify_ciphertext(ct);	
+	conv(zz_to_ulong, chal_z4);
+	stringstreamZZ << hex << zz_to_ulong;
+
+	//cout << "StringstreamZZ hex of chal_z4 is " 
+	//<< stringstreamZZ.str() << endl;
+
+	return hash_keccak_SHA3_256(stringstreamZZ.str());
+
+}
+
+// Hash chal_x2 and commitments to B.
+// Process:
+//	1. Cast each element of c_B to unsigned long,
+//      2. append all to a string stream in hex format
+//      3. cast the stream to an appropariate structure (BitSequence).
+ZZ func_ver::hash_chal_x2_c_B(ZZ chal_x2, vector<Mod_p>* c_B) {
+        unsigned long zz_to_ulong = 0;
+	stringstream stringstreamZZ;
 
 	conv(zz_to_ulong, chal_x2);
 	stringstreamZZ << hex << zz_to_ulong;

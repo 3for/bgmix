@@ -164,14 +164,14 @@ string Verifier_toom::round_4(string in_name){
 	name = name + ctime(&rawtime);
 
 	// non-interactive
-	chal_z4 = func_ver::hash_chal_x2_c_B(chal_x2, c_B, c);
+	chal_z4 = func_ver::hash_chal_x2_c_B(chal_x2, c_B);
 	cout << "chal_z4 hash: " << chal_z4 << endl;
-	cout << "hash input: chal_x2, c_B, c." << endl;
+	cout << "hash input: chal_x2, c_B." << endl;
 
 	// non-interactive
-	chal_y4 = func_ver::hash_chal_x2_c_B(chal_x2, c_B, C);
+	chal_y4 = func_ver::hash_chal_z4(chal_z4);
 	cout << "chal_y4 hash: " << chal_y4 << endl;
-	cout << "hash input: chal_x2, c_B, C." << endl;
+	cout << "hash input: chal_z4." << endl;
 
 	ofstream ost(name.c_str());
 	ost<< chal_z4<<"\n";
