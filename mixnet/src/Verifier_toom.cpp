@@ -413,7 +413,7 @@ ZZ Verifier_toom:: round_10(string in_name,vector<vector<Cipher_elg>* >* enc, ve
 											//Check the the reencryption of the E_c is correct
 											b = check_ac();
 											if(b==1){
-												//cout<<"Accept!";
+												cout << "Accept!" << endl;
 											}
 										}
 									}
