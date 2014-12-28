@@ -688,6 +688,11 @@ void func_ver::fill_x8(vector<ZZ>* chal_x8, vector<vector<long>* >* basis_chal_x
 	}
 }
 
+// Hash commitments c_a, ciphertext E to compute chal_x8.
+// Process:
+//	1. Cast all to unsigned long,
+//      2. append all to a string stream in hex format
+//      3. cast the stream to an appropariate structure (BitSequence).
 void func_ver::hash_fill_x8(ZZ chal_x6, vector<Mod_p>* c_a,
                                         vector<Cipher_elg>* E,
                                         vector<ZZ>* chal_x8,
@@ -731,9 +736,12 @@ void func_ver::hash_fill_x8(ZZ chal_x6, vector<Mod_p>* c_a,
 	}
 }
 
-void func_ver::hash_fill_vector(ZZ chal_in, vector<Mod_p>* com, 
-                                vector<Cipher_elg>* C_c, 
-                                vector<ZZ>* chal) {
+// Hash chal_z4 and chal_x6 to compute chal_y6.
+// Process:
+//	1. Cast all to unsigned long,
+//      2. append all to a string stream in hex format
+//      3. cast the stream to an appropariate structure (BitSequence).
+void func_ver::hash_fill_vector_chal(ZZ chal_y4, ZZ chal_x6, vector<ZZ>* chal_y6) {
 	long i,l;
 	ZZ temp;
 	ZZ ord = H.get_ord();
@@ -741,10 +749,42 @@ void func_ver::hash_fill_vector(ZZ chal_in, vector<Mod_p>* com,
         unsigned long zz_to_ulong = 0;
 	stringstream stringstreamZZ;
 	
-	conv(zz_to_ulong, chal_in);
+	conv(zz_to_ulong, chal_y4);
 	stringstreamZZ << hex << zz_to_ulong;
 
-	stringstreamZZ << stringify_commitment(com);
+	conv(zz_to_ulong, chal_x6);
+	stringstreamZZ << hex << zz_to_ulong;
+
+	temp = hash_keccak_SHA3_256(stringstreamZZ.str());
+
+	l = chal_y6->size();
+	chal_y6->at(0)=temp;
+	for(i=1; i<l; i++){
+		MulMod(chal_y6->at(i), chal_y6->at(i-1), temp, ord);
+	}
+}
+
+// Hash chal_z4, commitments c_Dh and c_a_c, ciphertext C_c to compute chal_x6.
+// Process:
+//	1. Cast all to unsigned long,
+//      2. append all to a string stream in hex format
+//      3. cast the stream to an appropariate structure (BitSequence).
+void func_ver::hash_fill_vector(ZZ chal_z4, vector<Mod_p>* c_Dh,
+				vector<Mod_p>* c_a_c, 
+                                vector<Cipher_elg>* C_c, 
+                                vector<ZZ>* chal_x6) { 
+	long i,l;
+	ZZ temp;
+	ZZ ord = H.get_ord();
+
+        unsigned long zz_to_ulong = 0;
+	stringstream stringstreamZZ;
+	
+	conv(zz_to_ulong, chal_z4);
+	stringstreamZZ << hex << zz_to_ulong;
+
+	stringstreamZZ << stringify_commitment(c_Dh);
+	stringstreamZZ << stringify_commitment(c_a_c);
 
 	//Avoid the need for yet another string trasnformation function.
 	vector<vector<Cipher_elg>* > container; 
@@ -757,16 +797,16 @@ void func_ver::hash_fill_vector(ZZ chal_in, vector<Mod_p>* com,
 
 	temp = hash_keccak_SHA3_256(stringstreamZZ.str());
 
-	l = chal->size();
-	chal->at(0)=temp;
+	l = chal_x6->size();
+	chal_x6->at(0)=temp;
 	for(i=1; i<l; i++){
-		MulMod(chal->at(i), chal->at(i-1), temp, ord);
+		MulMod(chal_x6->at(i), chal_x6->at(i-1), temp, ord);
 	}
 }
 
-// Hash chal_x2 and commitments to B.
+// Hash chal_z4 to compute chal_y4.
 // Process:
-//	1. Cast each element of c_B to unsigned long,
+//	1. Cast chal_z4 to unsigned long,
 //      2. append all to a string stream in hex format
 //      3. cast the stream to an appropariate structure (BitSequence).
 ZZ func_ver::hash_chal_z4(ZZ chal_z4) {

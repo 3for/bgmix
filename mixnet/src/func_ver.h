@@ -62,9 +62,11 @@ public:
 					vector<ZZ>* chal_x8,
 					vector<vector<long>* >* basis_chal_x8, 
 					vector<ZZ>* mul_chal_x8, long omega);
-	static void hash_fill_vector(ZZ chal_in, vector<Mod_p>* com, 
+	static void hash_fill_vector_chal(ZZ chal_y4, ZZ chal_x6, vector<ZZ>* chal_y6);
+	static void hash_fill_vector(ZZ chal_z4, vector<Mod_p>* c_Dh,
+					vector<Mod_p>* c_a_c,
 					vector<Cipher_elg>* C_c, 
-					vector<ZZ>* chal);
+					vector<ZZ>* chal_x6);
 	static ZZ hash_chal_x2_c_B(ZZ chal_x2, vector<Mod_p>* c_B);
 	static ZZ hash_chal_z4(ZZ chal_z4);
 	static ZZ hash_cipher_Pedersen_ElGammal(vector<vector<Cipher_elg>* >* c,

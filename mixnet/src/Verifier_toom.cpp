@@ -202,14 +202,14 @@ string Verifier_toom::round_6(string in_name){
 	}
 
 	//sets the vector t to the values temp, temp^2,...
-	func_ver::hash_fill_vector(chal_z4, c_Dh, C_c, chal_x6);
+	func_ver::hash_fill_vector(chal_z4, c_Dh, c_a_c, C_c, chal_x6);
 	cout << "chal_x6 hash: " << chal_x6->at(0) << endl;
-	cout << "hash input: chal_z4, c_Dh, C_c." << endl;
+	cout << "hash input: chal_z4, c_Dh, c_a_c, C_c." << endl;
 
 	//sets the vector t to the values temp, temp^2,...
-	func_ver::hash_fill_vector(chal_y4, c_a_c, C_c, chal_y6);
+	func_ver::hash_fill_vector_chal(chal_y4, chal_x6->at(0), chal_y6);
 	cout << "chal_y6 hash: " << chal_y6->at(0) << endl;
-	cout << "hash input: chal_y4, c_a_c, C_c." << endl;
+	cout << "hash input: chal_y4, chal_x6" << endl;
 
 	name = "round_6 ";
 	name = name + ctime(&rawtime);
