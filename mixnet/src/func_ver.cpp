@@ -711,10 +711,16 @@ void func_ver::hash_fill_x8(ZZ chal_x6, vector<Mod_p>* c_a,
 
 	stringstreamZZ << stringify_commitment(c_a);
 
-	//Avoid the need for yet another string trasnformation function.
-	vector<vector<Cipher_elg>* > container; 
-	container.push_back(E);
-	stringstreamZZ << stringify_ciphertext(&container);
+	// If no optimization version is begin executed E ciphertext has been
+	// used for hashing in round 6. By passing NULL we escape the need for
+	// yet another function that transforms the passed parameters to hash 
+	// input.
+	if (E) {
+		//Avoid the need for yet another string trasnformation function.
+		vector<vector<Cipher_elg>* > container; 
+		container.push_back(E);
+		stringstreamZZ << stringify_ciphertext(&container);
+	}
 
 	//cout << "StringstreamZZ hex of chal_x8 and commitments of c_a "
 	//<< "and ciphertext E is " << stringstreamZZ.str() << endl;
@@ -784,12 +790,20 @@ void func_ver::hash_fill_vector(ZZ chal_z4, vector<Mod_p>* c_Dh,
 	stringstreamZZ << hex << zz_to_ulong;
 
 	stringstreamZZ << stringify_commitment(c_Dh);
-	stringstreamZZ << stringify_commitment(c_a_c);
+	if (c_a_c) stringstreamZZ << stringify_commitment(c_a_c);
 
-	//Avoid the need for yet another string trasnformation function.
-	vector<vector<Cipher_elg>* > container; 
-	container.push_back(C_c);
-	stringstreamZZ << stringify_ciphertext(&container);
+
+	// If no optimization version (Verifier.cpp) is begin executed 
+	// C_c ciphertext and c_a_c commitment do not exist. 
+	// By passing NULL we escape the need for
+	// yet another function that transforms the passed parameters to hash 
+	// input.
+	if (C_c) {
+		//Avoid the need for yet another string trasnformation function.
+		vector<vector<Cipher_elg>* > container; 
+		container.push_back(C_c);
+		stringstreamZZ << stringify_ciphertext(&container);
+	}
 
 	//cout << "StringstreamZZ hex of chal_z4 or chal_y4 and commitments " 
 	//<< "of c_Dh or c_a_c " << "and ciphertext C_c is " 

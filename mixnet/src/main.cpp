@@ -121,7 +121,7 @@ int shuffle_wo_opti(vector<vector<Cipher_elg>* >* c,
 	Prover* P=0;
 	Verifier* V=0;
 	P = new Prover(C,R,pi,num, genq);
-	V = new Verifier(num);
+	V = new Verifier(c, C, num);
 	double tstart, tstart_t, tstop,tstop_t, ttime, time_p, time_v;
 	ZZ chal_10,ans_12;
 	string file_name, name;

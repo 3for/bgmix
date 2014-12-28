@@ -24,7 +24,9 @@ NTL_CLIENT
 
 class Verifier {
 private:
-	long n,m; // User input, defines the dimensions of the matrix used in the protocol, m rows, n columns
+	vector<vector<Cipher_elg>* >* c; // Initial cyphertexts(non-interactive)
+	vector<vector<Cipher_elg>* >* C; // Reencrypted cyphertexts(ditto)
+	long n, m, N; // User input, defines the dimensions of the matrix used in the protocol, m rows, n columns, N ciphertexts
 
 	vector<Mod_p>* c_A; //Commitments to the rows of A send from the prover in round 1
 	Mod_p c_D0; //commitment to the 0-th row in D
@@ -75,7 +77,9 @@ private:
 public:
 	// Constructors and Destructor
 	Verifier();
-	Verifier(map<string, long> num);
+	Verifier(vector<vector<Cipher_elg>* >* c,
+                 vector<vector<Cipher_elg>* >*C,
+                 map<string, long> num);
 	virtual ~Verifier();
 	//Stores the commitments to matrix Y and sends challenges vector s_1 and s_2 to the prover
 	string round_2(string name);

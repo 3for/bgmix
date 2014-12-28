@@ -31,10 +31,15 @@ Verifier::Verifier() {
 
 }
 
-Verifier::Verifier(map<string, long> num) {
+Verifier::Verifier(vector<vector<Cipher_elg>* >* cc,
+                   vector<vector<Cipher_elg>* >* CC,
+                   map<string, long> num) {
+	c = cc;
+	C = CC;
 	// sets the values of the matrix according to the input
 	m = num["ciphertext_matrix_rows"]; //number of rows
 	n = num["ciphertext_matrix_columns"]; //number of columns
+        N = num["number_of_ciphertexts"]; //added for non-interactive
 
 	c_A = new vector<Mod_p>(m+1); //allocate the storage for the commitments of Y
 	c_B = new vector<Mod_p>(m); //allocate the storage for the commitments of T
@@ -95,7 +100,20 @@ string Verifier::round_2(string in_name){
 		ist >> c_A->at(i);
 	}
 
-	chal_x2 = RandomBnd(ord);
+        /* instead of the interactive version:
+         * chal_x2 = RandomBnd(ord);
+         * hash the c_A matrix to get a random value.
+         */
+        chal_x2 = func_ver::hash_cipher_Pedersen_ElGammal(
+                                                 c, C, // ciphertexts
+                                                 n, // Pedersen
+                                                 0, 0, 0, // no expos here
+                                                 m, N, // ElGammal
+                                                 c_A); // commitment of A
+        cout << "chal_x2 hash: " << chal_x2 << endl;
+        cout << "hash input: c, C, n, omega=0, omega_LL=0, omega_sw=0, m,"
+	<< " N, c_A." << endl;
+
 
 	name = "round_2 ";
 	name = name + ctime(&rawtime);
@@ -122,8 +140,16 @@ string Verifier::round_4(string in_name){
 	name = "round_4 ";
 	name = name + ctime(&rawtime);
 
-	chal_y4 = RandomBnd(ord);
-	chal_z4 = RandomBnd(ord);
+        // non-interactive
+        chal_z4 = func_ver::hash_chal_x2_c_B(chal_x2, c_B);
+        cout << "chal_z4 hash: " << chal_z4 << endl;
+        cout << "hash input: chal_x2, c_B." << endl;
+
+        // non-interactive
+        chal_y4 = func_ver::hash_chal_z4(chal_z4);
+        cout << "chal_y4 hash: " << chal_y4 << endl;
+        cout << "hash input: chal_z4." << endl;
+
 
 	ofstream ost(name.c_str());
 	ost<< chal_z4<<"\n";
@@ -154,8 +180,18 @@ string Verifier::round_6(string in_name){
 	for (i = 0; i<l; i++){
 		ist >> E->at(i);
 	}
-	func_ver::fill_vector(chal_x6);
-	func_ver::fill_vector(chal_y6);
+
+        //sets the vector t to the values temp, temp^2,...
+        func_ver::hash_fill_vector(chal_z4, c_Dh, c_a, E, chal_x6);
+        cout << "chal_x6 hash: " << chal_x6->at(0) << endl;
+        cout << "hash input: chal_z4, c_Dh, c_a, E." << endl;
+
+        //sets the vector t to the values temp, temp^2,...
+        func_ver::hash_fill_vector_chal(chal_y4, chal_x6->at(0), chal_y6);
+        cout << "chal_y6 hash: " << chal_y6->at(0) << endl;
+        cout << "hash input: chal_y4, chal_x6" << endl;
+
+
 	name = "round_6 ";
 	name = name + ctime(&rawtime);
 	ofstream ost(name.c_str());
@@ -203,7 +239,11 @@ string  Verifier::round_8(string in_name){
 
 	//sets e as Vandermode vector with value chal
 	l= chal_x8->size(); //length of vector chal_x8;
-	func_ver::fill_vector(chal_x8);
+
+        func_ver::hash_fill_vector(chal_x6->at(0), c_Dl, NULL, NULL, chal_x8);
+        cout << "chal_x8 hash: " << chal_x8->at(0) << endl;
+        cout << "hash input: chal_x6, c_Dl." << endl;
+
 	name = "round_8 ";
 	name = name + ctime(&rawtime);
 	ofstream ost(name.c_str());

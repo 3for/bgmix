@@ -135,7 +135,8 @@ string Verifier_toom::round_2(string in_name){
 						 m, N, // ElGammal
 						 c_A); // commitment of A
 	cout << "chal_x2 hash: " << chal_x2 << endl;
-	cout << "hash input: c, C, n, omega, omega_LL, omega_sw, m, N, c_A." << endl;
+	cout << "hash input: c, C, n, omega, omega_LL, omega_sw, m, N, c_A." 
+	<< endl;
 
 
 	name = "round_2 ";

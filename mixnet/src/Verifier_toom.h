@@ -23,7 +23,7 @@ class Verifier_toom {
 private:
 	vector<vector<Cipher_elg>* >* c; // Initial cyphertexts(non-interactive)
 	vector<vector<Cipher_elg>* >* C; // Reencrypted cyphertexts(ditto)
-	long n,m, N; // User input, defines the dimensions of the matrix used in the protocol, m rows, n columns
+	long n,m, N; // User input, defines the dimensions of the matrix used in the protocol, m rows, n columns, N ciphertexts
 	long omega; //window size for multi-exponentiation technique
 	long omega_sw; //window size for multi-exponentiation technique sliding window and LL
 	long omega_LL; //window size for multi-exponentiation technique of LL
