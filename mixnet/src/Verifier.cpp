@@ -277,7 +277,7 @@ ZZ Verifier:: round_10(string in_name,vector<vector<Cipher_elg>* >* enc, vector<
 										//Check correctness of the ciphertexts
 										b =func_ver::check_E(C, E, chal_x6, B_bar, a_bar, rho_bar);
 										if(b==1 ){
-											//cout<<" Accept ";
+											cout << "Accept!" << endl;
 										}
 									}
 								}
