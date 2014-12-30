@@ -28,6 +28,11 @@ extern double time_rw_v;
 extern unsigned long commitment_multiplies;
 extern unsigned long commitment_lifts;
 extern unsigned long commitment_multi_lifts;
+#if DEBUG
+extern bool debug;
+#else
+extern bool debug;
+#endif
 
 //Constructors
 Verifier::Verifier() {
@@ -124,12 +129,14 @@ string Verifier::round_2(string in_name){
 	ofstream ost(name.c_str());
 	ost<<chal_x2;
 
-        cout << "Commitment multiplies in round 2: "
-        << commitment_multiplies << endl;
-        cout << "Commitment lifts in round 2: "
-        << commitment_lifts << endl;
-        cout << "Commitment multi_lifts in round 2: "
-        << commitment_multi_lifts << endl;
+	if (debug) {
+        	cout << "Commitment multiplies in round 2: "
+        	<< commitment_multiplies << endl;
+        	cout << "Commitment lifts in round 2: "
+        	<< commitment_lifts << endl;
+        	cout << "Commitment multi_lifts in round 2: "
+        	<< commitment_multi_lifts << endl;
+	}
 	return name;
 }
 
@@ -164,12 +171,15 @@ string Verifier::round_4(string in_name){
 	ofstream ost(name.c_str());
 	ost<< chal_z4<<"\n";
 	ost<<chal_y4 ;
-        cout << "Commitment multiplies in round 4: "
-        << commitment_multiplies << endl;
-        cout << "Commitment lifts in round 4: "
-        << commitment_lifts << endl;
-        cout << "Commitment multi_lifts in round 4: "
-        << commitment_multi_lifts << endl;
+	
+	if (debug) {
+        	cout << "Commitment multiplies in round 4: "
+       		<< commitment_multiplies << endl;
+        	cout << "Commitment lifts in round 4: "
+        	<< commitment_lifts << endl;
+        	cout << "Commitment multi_lifts in round 4: "
+        	<< commitment_multi_lifts << endl;
+	}
 	return name;
 }
 
@@ -220,12 +230,14 @@ string Verifier::round_6(string in_name){
 	}
 	ost << "\n";
 
-        cout << "Commitment multiplies in round 6: "
-        << commitment_multiplies << endl;
-        cout << "Commitment lifts in round 6: "
-        << commitment_lifts << endl;
-        cout << "Commitment multi_lifts in round 6: "
-        << commitment_multi_lifts << endl;
+	if (debug) {
+        	cout << "Commitment multiplies in round 6: "
+        	<< commitment_multiplies << endl;
+        	cout << "Commitment lifts in round 6: "
+        	<< commitment_lifts << endl;
+        	cout << "Commitment multi_lifts in round 6: "
+        	<< commitment_multi_lifts << endl;
+	}
 	return name;
 
 }
@@ -273,12 +285,14 @@ string  Verifier::round_8(string in_name){
 		ost << chal_x8->at(i)<< " ";
 	}
 
-        cout << "Commitment multiplies in round 8: "
-        << commitment_multiplies << endl;
-        cout << "Commitment lifts in round 8: "
-        << commitment_lifts << endl;
-        cout << "Commitment multi_lifts in round 8: "
-        << commitment_multi_lifts << endl;
+	if (debug) {
+        	cout << "Commitment multiplies in round 8: "
+        	<< commitment_multiplies << endl;
+        	cout << "Commitment lifts in round 8: "
+        	<< commitment_lifts << endl;
+        	cout << "Commitment multi_lifts in round 8: "
+        	<< commitment_multi_lifts << endl;
+	}
 	return name;
 }
 
@@ -356,12 +370,14 @@ ZZ Verifier:: round_10(string in_name,vector<vector<Cipher_elg>* >* enc, vector<
 			}
 		}
 	}
-        cout << "Commitment multiplies in round 10: "
-        << commitment_multiplies << endl;
-        cout << "Commitment lifts in round 10: "
-        << commitment_lifts << endl;
-        cout << "Commitment multi_lifts in round 10: "
-        << commitment_multi_lifts << endl;
+	if (debug) {
+        	cout << "Commitment multiplies in round 10: "
+        	<< commitment_multiplies << endl;
+        	cout << "Commitment lifts in round 10: "
+        	<< commitment_lifts << endl;
+        	cout << "Commitment multi_lifts in round 10: "
+        	<< commitment_multi_lifts << endl;
+	}
 	return to_ZZ(-1);
 }
 

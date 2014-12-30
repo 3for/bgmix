@@ -29,6 +29,11 @@ extern ElGammal El;
 extern unsigned long commitment_multiplies;
 extern unsigned long commitment_lifts;
 extern unsigned long commitment_multi_lifts;
+#if DEBUG
+extern bool debug;
+#else
+extern bool debug;
+#endif
 
 Prover::Prover() {
 	// TODO Auto-generated constructor stub
@@ -159,12 +164,14 @@ string Prover::round_1(){
 	for (i=0; i<m; i++){
 		ost << c_A->at(i)<< " ";
 	}
-	cout << "Commitment multiplies in round 1: " 
-	<< commitment_multiplies << endl;
-	cout << "Commitment lifts in round 1: " 
-	<< commitment_lifts << endl;
-	cout << "Commitment multi_lifts in round 1: " 
-	<< commitment_multi_lifts << endl;
+	if (debug) {
+		cout << "Commitment multiplies in round 1: " 
+		<< commitment_multiplies << endl;
+		cout << "Commitment lifts in round 1: " 
+		<< commitment_lifts << endl;
+		cout << "Commitment multi_lifts in round 1: " 
+		<< commitment_multi_lifts << endl;
+	}
 	return name;
 
 }
@@ -208,12 +215,14 @@ string Prover::round_3(string in_name){
 	}
 
 	Functions::delete_vector(chal_x2);
-	cout << "Commitment multiplies in round 3: " 
-	<< commitment_multiplies << endl;
-	cout << "Commitment lifts in round 3: " 
-	<< commitment_lifts << endl;
-	cout << "Commitment multi_lifts in round 3: " 
-	<< commitment_multi_lifts << endl;
+	if (debug) {
+		cout << "Commitment multiplies in round 3: " 
+		<< commitment_multiplies << endl;
+		cout << "Commitment lifts in round 3: " 
+		<< commitment_lifts << endl;
+		cout << "Commitment multi_lifts in round 3: " 
+		<< commitment_multi_lifts << endl;
+	}
 	return name;
 }
 
@@ -326,12 +335,15 @@ string Prover::round_5(string in_name ){
 	}
 
 	delete E;
-	cout << "Commitment multiplies in round 5: " 
-	<< commitment_multiplies << endl;
-	cout << "Commitment lifts in round 5: " 
-	<< commitment_lifts << endl;
-	cout << "Commitment multi_lifts in round 5: " 
-	<< commitment_multi_lifts << endl;
+
+	if (debug) {
+		cout << "Commitment multiplies in round 5: " 
+		<< commitment_multiplies << endl;
+		cout << "Commitment lifts in round 5: " 
+		<< commitment_lifts << endl;
+		cout << "Commitment multi_lifts in round 5: " 
+		<< commitment_multi_lifts << endl;
+	}
 	return name;
 }
 
@@ -428,12 +440,14 @@ string Prover::round_7(string in_name){
 
 	ost<< rho_bar;
 
-	cout << "Commitment multiplies in round 7: " 
-	<< commitment_multiplies << endl;
-	cout << "Commitment lifts in round 7: " 
-	<< commitment_lifts << endl;
-	cout << "Commitment multi_lifts in round 7: " 
-	<< commitment_multi_lifts << endl;
+	if (debug) {
+		cout << "Commitment multiplies in round 7: " 
+		<< commitment_multiplies << endl;
+		cout << "Commitment lifts in round 7: " 
+		<< commitment_lifts << endl;
+		cout << "Commitment multi_lifts in round 7: " 
+		<< commitment_multi_lifts << endl;
+	}
 	return name;
 }
 
@@ -524,12 +538,14 @@ string Prover::round_9(string in_name){
 	ost<<r_Ds_bar<<"\n";
 	ost<<r_Dl_bar<<"\n";
 
-	cout << "Commitment multiplies in round 9: " 
-	<< commitment_multiplies << endl;
-	cout << "Commitment lifts in round 9: " 
-	<< commitment_lifts << endl;
-	cout << "Commitment multi_lifts in round 9: " 
-	<< commitment_multi_lifts << endl;
+	if (debug) {
+		cout << "Commitment multiplies in round 9: " 
+		<< commitment_multiplies << endl;
+		cout << "Commitment lifts in round 9: " 
+		<< commitment_lifts << endl;
+		cout << "Commitment multi_lifts in round 9: " 
+		<< commitment_multi_lifts << endl;
+	}
 	return name;
 }
 

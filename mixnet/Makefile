@@ -40,6 +40,10 @@ CXXFLAGS=\
 
 LDFLAGS=
 
+ifdef DEBUG
+CFLAGS+=-DDEBUG
+CXXFLAGS+=-DDEBUG
+endif
 # libraries to link against
 LIBS +=  -lntl -lgmp
 

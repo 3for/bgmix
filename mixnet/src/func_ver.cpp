@@ -29,6 +29,11 @@ extern "C" {
 #include <iomanip>
 
 #define KAT_HASH_ERROR 4
+#if DEBUG
+extern bool debug;
+#else
+extern bool debug;
+#endif
 
 
 extern G_q G;
@@ -830,8 +835,10 @@ ZZ func_ver::hash_chal_z4(ZZ chal_z4) {
 	conv(zz_to_ulong, chal_z4);
 	stringstreamZZ << hex << zz_to_ulong;
 
-	//cout << "StringstreamZZ hex of chal_z4 is " 
-	//<< stringstreamZZ.str() << endl;
+	if (debug) {
+		cout << "StringstreamZZ hex of chal_z4 is " 
+		<< stringstreamZZ.str() << endl;
+	}
 
 	return hash_keccak_SHA3_256(stringstreamZZ.str());
 
@@ -851,8 +858,10 @@ ZZ func_ver::hash_chal_x2_c_B(ZZ chal_x2, vector<Mod_p>* c_B) {
 	
 	stringstreamZZ << stringify_commitment(c_B);
 
-	//cout << "StringstreamZZ hex of chal_x2 and commitments of B is " 
-	//<< stringstreamZZ.str() << endl;
+	if (debug) {
+		cout << "StringstreamZZ hex of chal_x2 and commitments of B is " 
+		<< stringstreamZZ.str() << endl;
+	}
 
 	return hash_keccak_SHA3_256(stringstreamZZ.str());
 }
@@ -874,9 +883,9 @@ ZZ func_ver::hash_cipher_Pedersen_ElGammal(vector<vector<Cipher_elg>* >* c,
         unsigned long zz_to_ulong = 0;
 	stringstream stringstreamZZ;
 	
-	//cout << "Stringifying ciphertext c." << endl;
+	if (debug) cout << "Stringifying ciphertext c." << endl;
 	stringstreamZZ << stringify_ciphertext(c); // Ciphertexts
-	//cout << "Stringifying ciphertext c completed; now C." << endl;
+	if (debug) cout << "Stringifying ciphertext c completed; now C." << endl;
 	stringstreamZZ << stringify_ciphertext(C);
 	//cout << "StringstreamZZ hex of initial and reencrypted ciphertexts is " 
 	//<< stringstreamZZ.str() << endl;
@@ -917,10 +926,10 @@ ZZ func_ver::hash_keccak_SHA3_256(string input) {
 	// 8-8.5M characters.
 	if (input.length() + 1 > 8000000) c_A_copy_length = 8000000;
 	else c_A_copy_length = input.length() + 1;  // Terminal char.
-	//cout << "c_A_copy_length: " << c_A_copy_length << endl;
+	if (debug) cout << "c_A_copy_length: " << c_A_copy_length << endl;
 
 	BitSequence c_A_copy[c_A_copy_length];
-	//cout << "BitSequence initiated." << endl;
+	if (debug) cout << "BitSequence initiated." << endl;
 	unsigned int squeezedOutputLength = 0; // For cross-matching with Keccak.
 	unsigned int SqueezingOutputLength = 4096;
 	unsigned int hashbitlen = 256;
@@ -933,18 +942,18 @@ ZZ func_ver::hash_keccak_SHA3_256(string input) {
         	return ZZ(INIT_VAL, KAT_HASH_ERROR);
     	}
 
-	//cout << "Read hex into bitsequence." << endl;
+	if (debug) cout << "Read hex into bitsequence." << endl;
 	// Adapt string stream to the required hash input structure.
 	ReadHexIntoBS(input, c_A_copy, c_A_copy_length);
 
 	// Keccak hashing interface.
-	//cout << "Keccak init." << endl;
+	if (debug) cout << "Keccak init." << endl;
 	Keccak_HashInitialize_SHA3_256(&hashInstance); // Init Keccak
-	//cout << "Keccak update." << endl;
+	if (debug) cout << "Keccak update." << endl;
 	Keccak_HashUpdate(&hashInstance, c_A_copy, c_A_copy_length);
-	//cout << "Keccak final." << endl;
+	if (debug) cout << "Keccak final." << endl;
 	Keccak_HashFinal(&hashInstance, Squeezed); // Keccak creates hash.
-	//cout << "Keccak printBstr." << endl;
+	if (debug) cout << "Keccak printBstr." << endl;
 
 	// Fit Keccak output to string. 
 	printBstr(Squeezed, 24, "Squeezed hash is: ", hashString);
@@ -953,7 +962,7 @@ ZZ func_ver::hash_keccak_SHA3_256(string input) {
 
 	// Create ZZ (chal_x2) from string.
 	ZZ hash_of_c_A(INIT_VAL, hashString.c_str());
-	//cout << "ZZ hash instance is " << hash_of_c_A << endl;
+	if (debug) cout << "ZZ hash instance is " << hash_of_c_A << endl;
 	return hash_of_c_A;
 }
 
@@ -972,9 +981,11 @@ string func_ver::stringify_commitment(vector<Mod_p>* com) {
 
 		// Append to string stream in hex format.
 		stringstreamZZ << hex << zz_to_ulong; 
-
-		//cout << "unsigned long in hex is " << stringstreamZZ.str() 
-		//<< endl;
+	
+		if (debug) {
+			cout << "unsigned long in hex is " << stringstreamZZ.str() 
+			<< endl;
+		}
 	}
 	return stringstreamZZ.str();
 }
