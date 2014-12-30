@@ -260,7 +260,7 @@ void Functions:: createCipher(vector<vector<Cipher_elg>* >* C,
 	ost<<"q "<<ord<<" p"<<H.get_mod()<<endl;
 	ost<<"Ciphertext c "<<endl;*/
 
-	ost.open("cipher.txt");
+	//ost.open("cipher.txt");
 	for (i=0; i<m; i++){
 		r  = new vector<Cipher_elg>(n);
 		for (j = 0; j <n; j++){
@@ -270,7 +270,7 @@ void Functions:: createCipher(vector<vector<Cipher_elg>* >* C,
 				temp = El.encrypt(ran_1, ran_2);
 				r->at(j)=temp;
 				count ++;
-					ost<<temp<<" ";
+					//ost<<temp<<" ";
 			}
 			else
 			{
@@ -280,7 +280,7 @@ void Functions:: createCipher(vector<vector<Cipher_elg>* >* C,
 				count++;
 			}
 		}
-			ost<<endl;
+			//ost<<endl;
 		C->at(i)=r;
 	}
 }

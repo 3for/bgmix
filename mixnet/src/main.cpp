@@ -195,9 +195,9 @@ file_name = V-> round_8(file_name);
 	ost.open(name.c_str(),ios::app);
 	ost<< time_v<<endl;
 	ost.close();
-//	ost << "The shuffle argument took " << ttime << " second(s)." << endl;
-//	ost << "The prover needed " <<time_p<<" in total and " << "the verifier needed "<<time_v<<" in total"<<endl;
-//	ost << "The commitments needed "<< time_cm<< "second(s)";
+	cout << "The shuffle argument took " << ttime << " second(s)." << endl;
+	cout << "The prover needed " <<time_p<<" in total and " << "the verifier needed "<<time_v<<" in total"<<endl;
+	cout << "The commitments needed "<< time_cm<< " second(s)." << endl;
 	delete P;
 	delete V;
 	return 1;
@@ -539,10 +539,9 @@ file_name = P->round_7(file_name);
 	ost.open(name.c_str(),ios::app);
 	ost<< time_v<<endl;
 	ost.close();
-/*	ost << "The optimized shuffle argument took " << ttime << " second(s)." << endl;
-	ost << "The prover needed " <<time_p<<" in total and "<< "the verifier needed "<<time_v<<" in total"<<endl;
-	ost << "The opt. commitments  "<< time_cm<< "second(s)";
-	ost.close();*/
+	cout << "The optimized shuffle argument took " << ttime << " second(s)." << endl;
+	cout << "The prover needed " <<time_p<<" in total and "<< "the verifier needed "<<time_v<<" in total" << endl;
+	cout << "The opt. commitments  "<< time_cm<< "second(s)." << endl;
 
 	delete P;
 	delete V;

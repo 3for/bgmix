@@ -874,7 +874,9 @@ ZZ func_ver::hash_cipher_Pedersen_ElGammal(vector<vector<Cipher_elg>* >* c,
         unsigned long zz_to_ulong = 0;
 	stringstream stringstreamZZ;
 	
+	//cout << "Stringifying ciphertext c." << endl;
 	stringstreamZZ << stringify_ciphertext(c); // Ciphertexts
+	//cout << "Stringifying ciphertext c completed; now C." << endl;
 	stringstreamZZ << stringify_ciphertext(C);
 	//cout << "StringstreamZZ hex of initial and reencrypted ciphertexts is " 
 	//<< stringstreamZZ.str() << endl;
@@ -909,8 +911,16 @@ ZZ func_ver::hash_cipher_Pedersen_ElGammal(vector<vector<Cipher_elg>* >* c,
 
 ZZ func_ver::hash_keccak_SHA3_256(string input) {
 	Keccak_HashInstance hashInstance;
-	int c_A_copy_length = input.length() + 1;  // Terminal char.
+
+	int c_A_copy_length;
+	// BitSequence memory allocation fails at some point over
+	// 8-8.5M characters.
+	if (input.length() + 1 > 8000000) c_A_copy_length = 8000000;
+	else c_A_copy_length = input.length() + 1;  // Terminal char.
+	//cout << "c_A_copy_length: " << c_A_copy_length << endl;
+
 	BitSequence c_A_copy[c_A_copy_length];
+	//cout << "BitSequence initiated." << endl;
 	unsigned int squeezedOutputLength = 0; // For cross-matching with Keccak.
 	unsigned int SqueezingOutputLength = 4096;
 	unsigned int hashbitlen = 256;
@@ -923,13 +933,18 @@ ZZ func_ver::hash_keccak_SHA3_256(string input) {
         	return ZZ(INIT_VAL, KAT_HASH_ERROR);
     	}
 
+	//cout << "Read hex into bitsequence." << endl;
 	// Adapt string stream to the required hash input structure.
 	ReadHexIntoBS(input, c_A_copy, c_A_copy_length);
 
 	// Keccak hashing interface.
+	//cout << "Keccak init." << endl;
 	Keccak_HashInitialize_SHA3_256(&hashInstance); // Init Keccak
+	//cout << "Keccak update." << endl;
 	Keccak_HashUpdate(&hashInstance, c_A_copy, c_A_copy_length);
+	//cout << "Keccak final." << endl;
 	Keccak_HashFinal(&hashInstance, Squeezed); // Keccak creates hash.
+	//cout << "Keccak printBstr." << endl;
 
 	// Fit Keccak output to string. 
 	printBstr(Squeezed, 24, "Squeezed hash is: ", hashString);
@@ -995,7 +1010,7 @@ int func_ver::ReadHexIntoBS(string szz, BitSequence *A, int Length) {
 	}
 	memset(A, 0x00, Length);
 	started = 0;
-	for (unsigned i = 0; i < szz.length(); i++) {
+	for (unsigned i = 0; i < Length; i++) {
 		ch = szz.at(i);
 		if ( !isxdigit(ch) ) {
 			if ( !started ) {
