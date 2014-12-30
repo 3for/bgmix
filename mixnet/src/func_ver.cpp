@@ -789,7 +789,7 @@ void func_ver::hash_fill_vector(ZZ chal_z4, vector<Mod_p>* c_Dh,
 	conv(zz_to_ulong, chal_z4);
 	stringstreamZZ << hex << zz_to_ulong;
 
-	stringstreamZZ << stringify_commitment(c_Dh);
+	if (c_Dh) stringstreamZZ << stringify_commitment(c_Dh);
 	if (c_a_c) stringstreamZZ << stringify_commitment(c_a_c);
 
 

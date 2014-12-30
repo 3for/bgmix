@@ -62,8 +62,10 @@ public:
 					vector<ZZ>* chal_x8,
 					vector<vector<long>* >* basis_chal_x8, 
 					vector<ZZ>* mul_chal_x8, long omega);
-	static void hash_fill_vector_chal(ZZ chal_y4, ZZ chal_x6, vector<ZZ>* chal_y6);
-	static void hash_fill_vector(ZZ chal_z4, vector<Mod_p>* c_Dh,
+	static void hash_fill_vector_chal(ZZ chal_y4, ZZ chal_x6, 
+							vector<ZZ>* chal_y6);
+	static void hash_fill_vector(ZZ chal_z4, 
+				vector<Mod_p>* c_Dh, // Toom-Cook r6_red: NULL
 				vector<Mod_p>* c_a_c, // no opt: r6 c_a, r8 NULL
 				vector<Cipher_elg>* C_c,// no opt: r6 E, r8 NULL
 				vector<ZZ>* chal_x6);
