@@ -747,7 +747,7 @@ void func_ver::hash_fill_x8(ZZ chal_x6, vector<Mod_p>* c_a,
 //	1. Cast all to unsigned long,
 //      2. append all to a string stream in hex format
 //      3. cast the stream to an appropariate structure (BitSequence).
-void func_ver::hash_fill_vector_chal(ZZ chal_y4, ZZ chal_x6, vector<ZZ>* chal_y6) {
+void func_ver::hash_fill_chals(ZZ chal_y4, ZZ chal_x6, vector<ZZ>* chal_y6) {
 	long i,l;
 	ZZ temp;
 	ZZ ord = H.get_ord();
@@ -775,7 +775,7 @@ void func_ver::hash_fill_vector_chal(ZZ chal_y4, ZZ chal_x6, vector<ZZ>* chal_y6
 //	1. Cast all to unsigned long,
 //      2. append all to a string stream in hex format
 //      3. cast the stream to an appropariate structure (BitSequence).
-void func_ver::hash_fill_vector(ZZ chal_z4, vector<Mod_p>* c_Dh,
+void func_ver::hash_fill_commits_cipher(ZZ chal_z4, vector<Mod_p>* c_Dh,
 				vector<Mod_p>* c_a_c, 
                                 vector<Cipher_elg>* C_c, 
                                 vector<ZZ>* chal_x6) { 

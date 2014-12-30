@@ -17,6 +17,9 @@ NTL_CLIENT
 #include <fstream>
 
 extern double time_cm;
+extern unsigned long commitment_multiplies;
+extern unsigned long commitment_lifts;
+extern unsigned long commitment_multi_lifts;
 
 Pedersen::Pedersen() {
 	// TODO Auto-generated constructor stub
@@ -452,10 +455,13 @@ Mod_p Pedersen::commit(const vector<ZZ>*  t, ZZ ran){
 	else
 	{
 		PowerMod(temp, gen->at(0).get_val(),ran, mod);
+		commitment_lifts += 1;
 		for (i = 1; i<=(long) t->size(); i++)
 		{
 			PowerMod(temp_1,gen->at(i).get_val(),t->at(i-1),mod);
 			MulMod(temp,temp,temp_1, mod);
+			commitment_multiplies += 1;
+			commitment_lifts += 1;
 		}
 	}
 	tstop = (double)clock()/CLOCKS_PER_SEC;
@@ -478,10 +484,13 @@ Mod_p Pedersen::commit(const vector<Mod_p>*  t,  ZZ ran){
 	else
 	{
 		PowerMod(temp,gen->at(0).get_val(),ran, mod);
+		commitment_lifts += 1;
 		for (i = 1; i<=(long) t->size(); i++)
 		{
 			PowerMod(temp_1,gen->at(i).get_val(),t->at(i-1).get_val(),mod);
 			MulMod(temp , temp,temp_1,mod);
+			commitment_multiplies += 1;
+			commitment_lifts += 1;
 		}
 	}
 	tstop = (double)clock()/CLOCKS_PER_SEC;
@@ -507,10 +516,13 @@ Mod_p Pedersen::commit(const vector<Mod_p>*  t){
 	else
 	{
 		PowerMod(temp,gen->at(0).get_val(),ran, mod);
+		commitment_lifts += 1;
 		for (i = 1; i<=(long) t->size(); i++)
 		{
 			PowerMod(temp_1,gen->at(i).get_val(),t->at(i-1).get_val(),mod);
 			MulMod(temp , temp, temp_1,mod);
+			commitment_multiplies += 1;
+			commitment_lifts += 1;
 		}
 	}
 	tstop = (double)clock()/CLOCKS_PER_SEC;
@@ -601,6 +613,7 @@ Mod_p Pedersen::commit_opt(const vector<ZZ>*  t, ZZ ran){
 			temp = temp_1.get_val();
 		} else {*/
 			multi_expo::expo_mult(temp, t, ran, omega_expo, gen);
+			commitment_multi_lifts += 1;
 		//}
 	}
 

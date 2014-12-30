@@ -25,6 +25,10 @@ extern Pedersen Ped;
 extern ElGammal El;
 extern double time_rw_v;
 
+extern unsigned long commitment_multiplies;
+extern unsigned long commitment_lifts;
+extern unsigned long commitment_multi_lifts;
+
 //Constructors
 Verifier::Verifier() {
 	// TODO Auto-generated constructor stub
@@ -120,6 +124,12 @@ string Verifier::round_2(string in_name){
 	ofstream ost(name.c_str());
 	ost<<chal_x2;
 
+        cout << "Commitment multiplies in round 2: "
+        << commitment_multiplies << endl;
+        cout << "Commitment lifts in round 2: "
+        << commitment_lifts << endl;
+        cout << "Commitment multi_lifts in round 2: "
+        << commitment_multi_lifts << endl;
 	return name;
 }
 
@@ -154,6 +164,12 @@ string Verifier::round_4(string in_name){
 	ofstream ost(name.c_str());
 	ost<< chal_z4<<"\n";
 	ost<<chal_y4 ;
+        cout << "Commitment multiplies in round 4: "
+        << commitment_multiplies << endl;
+        cout << "Commitment lifts in round 4: "
+        << commitment_lifts << endl;
+        cout << "Commitment multi_lifts in round 4: "
+        << commitment_multi_lifts << endl;
 	return name;
 }
 
@@ -182,12 +198,12 @@ string Verifier::round_6(string in_name){
 	}
 
         //sets the vector t to the values temp, temp^2,...
-        func_ver::hash_fill_vector(chal_z4, c_Dh, c_a, E, chal_x6);
+        func_ver::hash_fill_commits_cipher(chal_z4, c_Dh, c_a, E, chal_x6);
         cout << "chal_x6 hash: " << chal_x6->at(0) << endl;
         cout << "hash input: chal_z4, c_Dh, c_a, E." << endl;
 
         //sets the vector t to the values temp, temp^2,...
-        func_ver::hash_fill_vector_chal(chal_y4, chal_x6->at(0), chal_y6);
+        func_ver::hash_fill_chals(chal_y4, chal_x6->at(0), chal_y6);
         cout << "chal_y6 hash: " << chal_y6->at(0) << endl;
         cout << "hash input: chal_y4, chal_x6" << endl;
 
@@ -204,6 +220,12 @@ string Verifier::round_6(string in_name){
 	}
 	ost << "\n";
 
+        cout << "Commitment multiplies in round 6: "
+        << commitment_multiplies << endl;
+        cout << "Commitment lifts in round 6: "
+        << commitment_lifts << endl;
+        cout << "Commitment multi_lifts in round 6: "
+        << commitment_multi_lifts << endl;
 	return name;
 
 }
@@ -240,7 +262,7 @@ string  Verifier::round_8(string in_name){
 	//sets e as Vandermode vector with value chal
 	l= chal_x8->size(); //length of vector chal_x8;
 
-        func_ver::hash_fill_vector(chal_x6->at(0), c_Dl, NULL, NULL, chal_x8);
+        func_ver::hash_fill_commits_cipher(chal_x6->at(0), c_Dl, NULL, NULL, chal_x8);
         cout << "chal_x8 hash: " << chal_x8->at(0) << endl;
         cout << "hash input: chal_x6, c_Dl." << endl;
 
@@ -251,6 +273,12 @@ string  Verifier::round_8(string in_name){
 		ost << chal_x8->at(i)<< " ";
 	}
 
+        cout << "Commitment multiplies in round 8: "
+        << commitment_multiplies << endl;
+        cout << "Commitment lifts in round 8: "
+        << commitment_lifts << endl;
+        cout << "Commitment multi_lifts in round 8: "
+        << commitment_multi_lifts << endl;
 	return name;
 }
 
@@ -328,6 +356,12 @@ ZZ Verifier:: round_10(string in_name,vector<vector<Cipher_elg>* >* enc, vector<
 			}
 		}
 	}
+        cout << "Commitment multiplies in round 10: "
+        << commitment_multiplies << endl;
+        cout << "Commitment lifts in round 10: "
+        << commitment_lifts << endl;
+        cout << "Commitment multi_lifts in round 10: "
+        << commitment_multi_lifts << endl;
 	return to_ZZ(-1);
 }
 

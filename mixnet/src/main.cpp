@@ -42,6 +42,10 @@ NTL_CLIENT
  long m_r=0;//number of rows after reduction
  long mu=0; //number of rows after reduction
  long mu_h=0;//2*mu-1, number of extra elements in the reduction
+ 
+ unsigned long commitment_multiplies = 0;
+ unsigned long commitment_lifts = 0;
+ unsigned long commitment_multi_lifts = 0;
 
  int shuffle_wo_opti(vector<vector<Cipher_elg>* >* e,vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, map<string, long> num, ZZ genq);
  int shuffle_w_opti_me(vector<vector<Cipher_elg>* >* e, vector<vector<Cipher_elg>* >* E, vector<vector<ZZ>*>* R,vector<vector<vector<long>* >* > * pi, map<string, long> num);
