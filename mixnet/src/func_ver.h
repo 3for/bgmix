@@ -64,11 +64,11 @@ public:
 					vector<ZZ>* mul_chal_x8, long omega);
 	static void hash_fill_chals(ZZ chal_y4, ZZ chal_x6, 
 							vector<ZZ>* chal_y6);
-	static void hash_fill_commits_cipher(ZZ chal_z4, 
-				vector<Mod_p>* c_Dh, // Toom-Cook r6_red: NULL
-				vector<Mod_p>* c_a_c, // no opt: r6 c_a, r8 NULL
-				vector<Cipher_elg>* C_c,// no opt: r6 E, r8 NULL
-				vector<ZZ>* chal_x6);
+	static void hash_fill_commits_cipher(ZZ chal_in, 
+				vector<Mod_p>* com1, 
+				vector<Mod_p>* com2, 
+				vector<Cipher_elg>* ct,
+				vector<ZZ>* chal_out);
 	static ZZ hash_chal_x2_c_B(ZZ chal_x2, vector<Mod_p>* c_B);
 	static ZZ hash_chal_z4(ZZ chal_z4);
 	static ZZ hash_cipher_Pedersen_ElGammal(vector<vector<Cipher_elg>* >* c,

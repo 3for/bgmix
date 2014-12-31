@@ -780,10 +780,10 @@ void func_ver::hash_fill_chals(ZZ chal_y4, ZZ chal_x6, vector<ZZ>* chal_y6) {
 //	1. Cast all to unsigned long,
 //      2. append all to a string stream in hex format
 //      3. cast the stream to an appropariate structure (BitSequence).
-void func_ver::hash_fill_commits_cipher(ZZ chal_z4, vector<Mod_p>* c_Dh,
-				vector<Mod_p>* c_a_c, 
-                                vector<Cipher_elg>* C_c, 
-                                vector<ZZ>* chal_x6) { 
+void func_ver::hash_fill_commits_cipher(ZZ chal_in, vector<Mod_p>* com1,
+				vector<Mod_p>* com2, 
+                                vector<Cipher_elg>* ct, 
+                                vector<ZZ>* chal_out) { 
 	long i,l;
 	ZZ temp;
 	ZZ ord = H.get_ord();
@@ -791,11 +791,11 @@ void func_ver::hash_fill_commits_cipher(ZZ chal_z4, vector<Mod_p>* c_Dh,
         unsigned long zz_to_ulong = 0;
 	stringstream stringstreamZZ;
 	
-	conv(zz_to_ulong, chal_z4);
+	conv(zz_to_ulong, chal_in);
 	stringstreamZZ << hex << zz_to_ulong;
 
-	if (c_Dh) stringstreamZZ << stringify_commitment(c_Dh);
-	if (c_a_c) stringstreamZZ << stringify_commitment(c_a_c);
+	if (com1) stringstreamZZ << stringify_commitment(com1);
+	if (com2) stringstreamZZ << stringify_commitment(com2);
 
 
 	// If no optimization version (Verifier.cpp) is begin executed 
@@ -803,10 +803,10 @@ void func_ver::hash_fill_commits_cipher(ZZ chal_z4, vector<Mod_p>* c_Dh,
 	// By passing NULL we escape the need for
 	// yet another function that transforms the passed parameters to hash 
 	// input.
-	if (C_c) {
+	if (ct) {
 		//Avoid the need for yet another string trasnformation function.
 		vector<vector<Cipher_elg>* > container; 
-		container.push_back(C_c);
+		container.push_back(ct);
 		stringstreamZZ << stringify_ciphertext(&container);
 	}
 
@@ -816,10 +816,10 @@ void func_ver::hash_fill_commits_cipher(ZZ chal_z4, vector<Mod_p>* c_Dh,
 
 	temp = hash_keccak_SHA3_256(stringstreamZZ.str());
 
-	l = chal_x6->size();
-	chal_x6->at(0)=temp;
+	l = chal_out->size();
+	chal_out->at(0)=temp;
 	for(i=1; i<l; i++){
-		MulMod(chal_x6->at(i), chal_x6->at(i-1), temp, ord);
+		MulMod(chal_out->at(i), chal_out->at(i-1), temp, ord);
 	}
 }
 

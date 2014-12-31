@@ -208,9 +208,10 @@ string Verifier::round_6(string in_name){
 	}
 
         //sets the vector t to the values temp, temp^2,...
-        func_ver::hash_fill_commits_cipher(chal_z4, c_Dh, c_a, E, chal_x6);
+        func_ver::hash_fill_commits_cipher(ZZ(INIT_VAL, 0), c_Dh, c_a, E, 
+								chal_x6);
         cout << "chal_x6 hash: " << chal_x6->at(0) << endl;
-        cout << "hash input: chal_z4, c_Dh, c_a, E." << endl;
+        cout << "hash input: c_Dh, c_a, E." << endl;
 
         //sets the vector t to the values temp, temp^2,...
         func_ver::hash_fill_chals(chal_y4, chal_x6->at(0), chal_y6);
