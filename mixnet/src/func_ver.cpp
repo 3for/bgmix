@@ -921,14 +921,10 @@ ZZ func_ver::hash_cipher_Pedersen_ElGammal(vector<vector<Cipher_elg>* >* c,
 ZZ func_ver::hash_keccak_SHA3_256(string input) {
 	Keccak_HashInstance hashInstance;
 
-	int c_A_copy_length;
-	// BitSequence memory allocation fails at some point over
-	// 8-8.5M characters.
-	if (input.length() + 1 > 8000000) c_A_copy_length = 8000000;
-	else c_A_copy_length = input.length() + 1;  // Terminal char.
+	int c_A_copy_length = input.length() + 1;
 	if (debug) cout << "c_A_copy_length: " << c_A_copy_length << endl;
 
-	BitSequence c_A_copy[c_A_copy_length];
+	BitSequence *c_A_copy = new BitSequence[c_A_copy_length];
 	if (debug) cout << "BitSequence initiated." << endl;
 	unsigned int squeezedOutputLength = 0; // For cross-matching with Keccak.
 	unsigned int SqueezingOutputLength = 4096;
@@ -954,6 +950,7 @@ ZZ func_ver::hash_keccak_SHA3_256(string input) {
 	if (debug) cout << "Keccak final." << endl;
 	Keccak_HashFinal(&hashInstance, Squeezed); // Keccak creates hash.
 	if (debug) cout << "Keccak printBstr." << endl;
+	delete c_A_copy;
 
 	// Fit Keccak output to string. 
 	printBstr(Squeezed, 24, "Squeezed hash is: ", hashString);
